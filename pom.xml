@@ -20,7 +20,6 @@
       <type>pom</type>
     </dependency>
 
-
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-servlet</artifactId>
@@ -47,31 +46,18 @@
     </dependency>
 
 
-		<!-- These dependencies are here just for enabling logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>0.9.24</version>
-		</dependency>
-
 		<!-- Test scope -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.5</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+      <scope>test</scope>
+    </dependency>
 
-		<!--
-			GAE libraries for local testing as described here:
-			http://code.google.com/appengine/docs/java/howto/unittesting.html
-		-->
+    <!--
+        GAE libraries for local testing as described here:
+        http://code.google.com/appengine/docs/java/howto/unittesting.html
+      -->
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-labs</artifactId>
@@ -97,17 +83,6 @@
 
 	<build>
 		<plugins>
-			<!--
-				Upload application to the appspot automatically, during
-				release:perform
-			-->
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<configuration>
-					<goals>gae:deploy</goals>
-				</configuration>
-			</plugin>
-
 			<!-- Java compiler version -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -123,11 +98,9 @@
 
 	<!-- Specify hard-coded project properties here -->
 	<properties>
-
 	  <!-- Sets the project's default encoding.
          http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
 		<!--
 			This is just for "eclipse:eclipse" goal to always attempt downloading
 			sources
@@ -140,50 +113,7 @@
 			your Eclipse plug-in)
 		-->
 		<gae.version>1.4.3</gae.version>
-
-		<!--
-			Upload to http://test.latest.<applicationName>.appspot.com by default
-		-->
-		<gae.application.version>test</gae.application.version>
-
-        <datanucleus.version>1.1.5</datanucleus.version>
 	</properties>
 
-	<profiles>
-		<!--
-			We can configure our integration server to activate this profile and
-			perform gae:deploy, thus uploading latest snapshot to the
-			http://1.latest.<applicationName>.appspot.com automatically
-		-->
-		<profile>
-			<id>integration-build</id>
-			<properties>
-				<gae.application.version>stage</gae.application.version>
-			</properties>
-		</profile>
-
-		<!--
-			This profile will activate automatically during release and upload
-			application to the http://2.latest.<applicationName>.appspot.com (We
-			might want to set the 2nd version as our applications Default version
-			to be accessible at http://<applicationName>.appspot.com)
-		-->
-		<profile>
-			<id>release-build</id>
-			<activation>
-				<property>
-					<name>performRelease</name>
-					<value>true</value>
-				</property>
-			</activation>
-
-			<properties>
-				<!--
-					During release, set application version in appengine-web.xml to 2
-				-->
-				<gae.application.version>release</gae.application.version>
-			</properties>
-		</profile>
-	</profiles>
 
 </project>
