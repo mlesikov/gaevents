@@ -6,7 +6,7 @@
   <groupId>com.clouway</groupId>
   <artifactId>gaevents</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <packaging>jar</packaging>
 
   <name>gaevents</name>
 
@@ -20,18 +20,6 @@
       <type>pom</type>
     </dependency>
 
-		<dependency>
-			<groupId>org.datanucleus</groupId>
-            <artifactId>datanucleus-core</artifactId>
-            <version>${datanucleus.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
-			<version>1.1</version>
-		</dependency>
 
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
@@ -58,27 +46,6 @@
       <version>2.0</version>
     </dependency>
 
-    <!--
-        J2EE Servlet API. We need it to compile IndexServlet class. You can
-        probably remove it, if you don't explicitly use Servlets
-      -->
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-servlet_2.5_spec</artifactId>
-			<version>1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!--
-			Make use of JSP tags. Remove, if you don't use JSPs
-		-->
-		<dependency>
-			<artifactId>standard</artifactId>
-			<groupId>taglibs</groupId>
-			<version>1.1.2</version>
-			<type>jar</type>
-			<scope>runtime</scope>
-		</dependency>
 
 		<!-- These dependencies are here just for enabling logging -->
 		<dependency>
@@ -126,112 +93,10 @@
 			<scope>test</scope>
 		</dependency>
 
-        <dependency>
-            <groupId>javax.jdo</groupId>
-            <artifactId>jdo2-api</artifactId>
-            <version>2.3-eb</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.transaction</groupId>
-                    <artifactId>transaction-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-	</dependencies>
+      </dependencies>
 
 	<build>
 		<plugins>
-			<!--
-				This plug-in "enhances" your domain model objects (i.e. makes them
-				persistent for datanucleus)
-			-->
-			<plugin>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>maven-datanucleus-plugin</artifactId>
-				<version>1.1.4</version>
-				<configuration>
-					<!--
-						Make sure this path contains your persistent classes!
-					-->
-					<mappingIncludes>**/model/*.class</mappingIncludes>
-					<verbose>true</verbose>
-					<enhancerName>ASM</enhancerName>
-					<api>JDO</api>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>enhance</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.datanucleus</groupId>
-						<artifactId>datanucleus-core</artifactId>
-						<version>${datanucleus.version}</version>
-						<exclusions>
-							<exclusion>
-								<groupId>javax.transaction</groupId>
-								<artifactId>transaction-api</artifactId>
-							</exclusion>
-						</exclusions>
-					</dependency>
-					<dependency>
-						<groupId>org.datanucleus</groupId>
-						<artifactId>datanucleus-rdbms</artifactId>
-						<version>${datanucleus.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.datanucleus</groupId>
-						<artifactId>datanucleus-enhancer</artifactId>
-						<version>1.1.4</version>
-					</dependency>
-					<dependency>
-						<groupId>javax.jdo</groupId>
-						<artifactId>jdo2-api</artifactId>
-						<version>2.3-ec</version>
-						<scope>runtime</scope>
-					</dependency>
-				</dependencies>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1-beta-1</version>
-				<configuration>
-					<webResources>
-						<resource>
-							<directory>src/main/webapp</directory>
-							<filtering>true</filtering>
-							<includes>
-								<include>**/appengine-web.xml</include>
-							</includes>
-						</resource>
-					</webResources>
-				</configuration>
-			</plugin>
-
-			<!--
-				The actual maven-gae-plugin. Type "mvn gae:run" to run project, "mvn
-				gae:deploy" to upload to GAE.
-			-->
-			<plugin>
-				<groupId>net.kindleit</groupId>
-				<artifactId>maven-gae-plugin</artifactId>
-				<version>0.8.4</version>
-        <dependencies>
-          <dependency>
-            <groupId>net.kindleit</groupId>
-            <artifactId>gae-runtime</artifactId>
-            <version>${gae.version}</version>
-            <type>pom</type>
-          </dependency>
-        </dependencies>
-			</plugin>
-
 			<!--
 				Upload application to the appspot automatically, during
 				release:perform
