@@ -1,5 +1,6 @@
 package com.clouway.asynctaskscheduler.spi;
 
+import com.clouway.asynceventbus.spi.AsyncEvent;
 import com.google.common.collect.Maps;
 
 import java.util.Date;
@@ -13,12 +14,13 @@ public class AsyncTaskOptions {
   private Map<String, String> params;
   private long delayMills = 0;
   private long executionDateMills = 0;
+  private AsyncEvent asyncEvent;
 
 
-  public AsyncTaskOptions(Class<? extends AsyncTask> asyncTask) {
-    this.asyncTask = asyncTask;
-    this.params = Maps.newHashMap();
+  private AsyncTaskOptions() {
+
   }
+
 
   public AsyncTaskOptions param(String name, String value) {
     params.put(name, value);
@@ -26,9 +28,18 @@ public class AsyncTaskOptions {
   }
 
   public static AsyncTaskOptions task(Class<? extends AsyncTask> asyncTaskClass) {
+    AsyncTaskOptions taskOptions = new AsyncTaskOptions();
+    taskOptions.asyncTask = asyncTaskClass;
+    taskOptions.params = Maps.newHashMap();
+    return taskOptions;
 
-    return new AsyncTaskOptions(asyncTaskClass);
+  }
 
+  public static AsyncTaskOptions event(AsyncEvent asyncEvent) {
+    AsyncTaskOptions taskOptions = new AsyncTaskOptions();
+    taskOptions.asyncEvent = asyncEvent;
+    taskOptions.params = Maps.newHashMap();
+    return taskOptions;
   }
 
 
@@ -62,5 +73,16 @@ public class AsyncTaskOptions {
 
   public String getAsyncTaskAsString() {
     return asyncTask.getName();
+  }
+
+  public AsyncEvent getAsyncEvent() {
+    return asyncEvent;
+  }
+
+  public boolean isEventTaskOption() {
+    if (asyncEvent != null) {
+      return true;
+    }
+    return false;
   }
 }

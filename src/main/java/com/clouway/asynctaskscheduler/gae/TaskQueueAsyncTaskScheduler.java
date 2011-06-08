@@ -7,6 +7,7 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 
 import java.util.List;
 import java.util.Map;
@@ -25,11 +26,16 @@ import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
  *
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
+class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
   public static final String TASK_QUEUE = "taskQueue";
-  private List<AsyncTaskOptions> taskOptions;
+  public static final String EVENT = "event";
+  public static final String EVENT_AS_JSON = "eventJson";
 
-  public TaskQueueAsyncTaskScheduler() {
+  private List<AsyncTaskOptions> taskOptions;
+  private final Gson gson;
+
+  public TaskQueueAsyncTaskScheduler(Gson gson) {
+    this.gson = gson;
     this.taskOptions = Lists.newArrayList();
   }
 
@@ -40,9 +46,43 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
   public void now() {
     for (AsyncTaskOptions taskOption : taskOptions) {
 
-      addTaskQueue(taskOption);
+      if (taskOption.isEventTaskOption()) {
+
+        addEventTaskQueueOption(taskOption);
+
+      } else {
+
+        addTaskQueue(taskOption);
+
+      }
 
     }
+  }
+
+  private void addEventTaskQueueOption(AsyncTaskOptions taskOptions) {
+
+    Queue queue = getQueue(taskOptions.getAsyncEvent().getClass());
+
+    TaskOptions task = createEventTaskOptions(taskOptions);
+
+
+    setExecutionDate(taskOptions, task);
+
+    queue.add(task);
+
+  }
+
+  private TaskOptions createEventTaskOptions(AsyncTaskOptions taskOptions) {
+    TaskOptions task;
+    task = withUrl(TaskQueueAsyncTaskExecutorServlet.URL);
+
+    //main task queue parameter
+    task.param(EVENT, taskOptions.getAsyncEvent().getClass().getName());
+    task.param(EVENT_AS_JSON, gson.toJson(taskOptions.getAsyncEvent()));
+
+    //adds all other parameters
+    task = addParams(task, taskOptions.getParams());
+    return task;
   }
 
   /**
@@ -57,6 +97,12 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
     TaskOptions task = createTaskOptions(taskOptions);
 
 
+    setExecutionDate(taskOptions, task);
+
+    queue.add(task);
+  }
+
+  private void setExecutionDate(AsyncTaskOptions taskOptions, TaskOptions task) {
     if (taskOptions.getDelayMills() > 0) {
 
       task.countdownMillis(taskOptions.getDelayMills());
@@ -66,7 +112,6 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
       task.etaMillis(taskOptions.getExecutionDateMills());
 
     }
-    queue.add(task);
   }
 
   /**

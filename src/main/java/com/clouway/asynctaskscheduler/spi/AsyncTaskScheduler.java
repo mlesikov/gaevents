@@ -30,6 +30,4 @@ public interface AsyncTaskScheduler {
    */
   public void now();
 
-
-
 }
