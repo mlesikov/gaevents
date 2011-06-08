@@ -33,10 +33,35 @@
 			<version>1.1</version>
 		</dependency>
 
-		<!--
-			J2EE Servlet API. We need it to compile IndexServlet class. You can
-			probably remove it, if you don't explicitly use Servlets
-		-->
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
+      <version>2.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r07</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>2.0</version>
+    </dependency>
+
+    <!--
+        J2EE Servlet API. We need it to compile IndexServlet class. You can
+        probably remove it, if you don't explicitly use Servlets
+      -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-servlet_2.5_spec</artifactId>
