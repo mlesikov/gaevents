@@ -31,8 +31,7 @@ import static junit.framework.Assert.assertEquals;
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
 public class TaskQueueAsyncTaskSchedulerTest {
-  private final LocalServiceTestHelper helper =
-          new LocalServiceTestHelper(new LocalTaskQueueTestConfig());
+  private LocalServiceTestHelper helper;
 
   @Inject
   private TaskQueueAsyncTaskScheduler taskScheduler;
@@ -42,6 +41,10 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
   @Before
   public void setUp() {
+    LocalTaskQueueTestConfig localTaskQueueTestConfig = new LocalTaskQueueTestConfig();
+    localTaskQueueTestConfig.setQueueXmlPath("src/test/java/queue.xml");
+    helper = new LocalServiceTestHelper(localTaskQueueTestConfig);
+
     helper.setUp();
     Injector injector = Guice.createInjector(new GaeAsyncTaskEventsModule(),new GaeAsyncTasksModule());
     injector.injectMembers(this);
