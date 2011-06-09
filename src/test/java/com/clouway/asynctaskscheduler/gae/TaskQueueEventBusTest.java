@@ -1,7 +1,6 @@
-package com.clouway.asynceventbus.gae;
+package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynceventbus.spi.AsyncEvent;
-import com.clouway.asynctaskscheduler.gae.TaskQueueAsyncTaskScheduler;
+import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.common.ActionEvent;
 import com.clouway.common.TaskQueueParamParser;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -40,7 +39,7 @@ public class TaskQueueEventBusTest {
   @Before
   public void setUp() throws Exception {
     helper.setUp();
-    Injector injector = Guice.createInjector(new GaeAsyncTaskEventsModule());
+    Injector injector = Guice.createInjector(new BackgroundTasksModule());
     injector.injectMembers(this);
   }
 

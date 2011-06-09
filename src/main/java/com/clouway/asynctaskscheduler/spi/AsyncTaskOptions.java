@@ -1,6 +1,5 @@
 package com.clouway.asynctaskscheduler.spi;
 
-import com.clouway.asynceventbus.spi.AsyncEvent;
 import com.google.common.collect.Maps;
 
 import java.util.Date;

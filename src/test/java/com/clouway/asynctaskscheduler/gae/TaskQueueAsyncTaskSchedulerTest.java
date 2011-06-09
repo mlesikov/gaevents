@@ -1,6 +1,5 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynceventbus.gae.GaeAsyncTaskEventsModule;
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
 import com.clouway.common.ActionEvent;
@@ -46,7 +45,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
     helper = new LocalServiceTestHelper(localTaskQueueTestConfig);
 
     helper.setUp();
-    Injector injector = Guice.createInjector(new GaeAsyncTaskEventsModule(),new GaeAsyncTasksModule());
+    Injector injector = Guice.createInjector(new BackgroundTasksModule());
     injector.injectMembers(this);
   }
 

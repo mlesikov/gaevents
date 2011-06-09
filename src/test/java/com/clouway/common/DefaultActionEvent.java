@@ -1,6 +1,6 @@
 package com.clouway.common;
 
-import com.clouway.asynceventbus.spi.AsyncEvent;
+import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.gae.QueueName;
 
 /**

@@ -1,4 +1,4 @@
-package com.clouway.asynceventbus.spi;
+package com.clouway.asynctaskscheduler.spi;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)

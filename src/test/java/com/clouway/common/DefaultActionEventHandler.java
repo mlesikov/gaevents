@@ -1,6 +1,6 @@
 package com.clouway.common;
 
-import com.clouway.asynceventbus.spi.AsyncEventHandler;
+import com.clouway.asynctaskscheduler.spi.AsyncEventHandler;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)

@@ -31,7 +31,7 @@ import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
  * .add(event(AsyncEventImpl))
  * .now();
  * <p/>
- * AsyncEventImpl implements {@link com.clouway.asynceventbus.spi.AsyncEvent}
+ * AsyncEventImpl implements {@link com.clouway.asynctaskscheduler.spi.AsyncEvent}
  *
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
@@ -70,7 +70,7 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
   }
 
   /**
-   * Adds Task queue options for an async even({@link com.clouway.asynceventbus.spi.AsyncEvent})
+   * Adds Task queue options for an async even({@link com.clouway.asynctaskscheduler.spi.AsyncEvent})
    *
    * @param taskOptions
    */

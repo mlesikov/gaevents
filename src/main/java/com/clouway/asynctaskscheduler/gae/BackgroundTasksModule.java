@@ -1,6 +1,6 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynceventbus.gae.GaeAsyncTaskEventsModule;
+import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
 import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
@@ -12,7 +12,7 @@ import com.google.inject.servlet.ServletModule;
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class GaeAsyncTasksModule extends AbstractModule {
+public class BackgroundTasksModule extends AbstractModule {
 
   final Module servlets = new ServletModule() {
     @Override
@@ -25,7 +25,12 @@ public class GaeAsyncTasksModule extends AbstractModule {
   @Override
   protected void configure() {
     install(servlets);
-    install(new GaeAsyncTaskEventsModule());
+  }
+
+
+  @Provides
+  public AsyncEventBus getAsyncEventBus(AsyncTaskScheduler asyncTaskScheduler) {
+    return new TaskQueueEventBus(asyncTaskScheduler);
   }
 
   @Provides
@@ -35,12 +40,12 @@ public class GaeAsyncTasksModule extends AbstractModule {
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof GaeAsyncTasksModule;
+    return o instanceof BackgroundTasksModule;
   }
 
   @Override
   public int hashCode() {
-    return GaeAsyncTasksModule.class.hashCode();
+    return BackgroundTasksModule.class.hashCode();
   }
 
 }

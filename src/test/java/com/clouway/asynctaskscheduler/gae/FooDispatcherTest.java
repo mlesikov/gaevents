@@ -1,6 +1,5 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynceventbus.gae.GaeAsyncTaskEventsModule;
 import com.clouway.common.ActionEvent;
 import com.clouway.common.ActionEventHandler;
 import com.clouway.common.DefaultTaskQueueAsyncTask;
@@ -38,7 +37,7 @@ public class FooDispatcherTest {
 
   @Before
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new GaeAsyncTaskEventsModule());
+    Injector injector = Guice.createInjector(new BackgroundTasksModule());
     injector.injectMembers(this);
 
     eventAsJson = gson.toJson(event);

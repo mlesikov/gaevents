@@ -1,7 +1,7 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynceventbus.spi.AsyncEvent;
-import com.clouway.asynceventbus.spi.AsyncEventHandler;
+import com.clouway.asynctaskscheduler.spi.AsyncEvent;
+import com.clouway.asynctaskscheduler.spi.AsyncEventHandler;
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskParams;
 import com.google.common.base.Strings;
