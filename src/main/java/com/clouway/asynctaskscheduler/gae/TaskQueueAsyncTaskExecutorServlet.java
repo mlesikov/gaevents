@@ -52,7 +52,6 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
 
       if (!Strings.isNullOrEmpty(eventClassAsString) && !Strings.isNullOrEmpty(eventAsJson)) {
 
-
         dispatchAsyncEvent(eventClassAsString, eventAsJson);
 
       } else if (!Strings.isNullOrEmpty(taskQueueName)) {
@@ -69,7 +68,9 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
   }
 
   private void dispatchAsyncEvent(String eventClassAsString, String eventAsJson) throws ClassNotFoundException {
+
     Class eventClass = Class.forName(eventClassAsString);
+
     AsyncEvent event = (AsyncEvent) gson.fromJson(eventAsJson, eventClass);
 
     EventHandler annotation = (EventHandler) eventClass.getAnnotation(EventHandler.class);
