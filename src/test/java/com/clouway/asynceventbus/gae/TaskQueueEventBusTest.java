@@ -1,5 +1,6 @@
 package com.clouway.asynceventbus.gae;
 
+import com.clouway.asynctaskscheduler.gae.TaskQueueAsyncTaskScheduler;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -50,9 +51,9 @@ public class TaskQueueEventBusTest {
   }
 
   private void assertEvent(String taskQueueBody, DefaultActionEvent event) {
-    assertTrue(taskQueueBody.contains(TaskQueueEventBus.EVENT));
+    assertTrue(taskQueueBody.contains(TaskQueueAsyncTaskScheduler.EVENT));
     assertTrue(taskQueueBody.contains(event.getClass().getName()));
-    assertTrue(taskQueueBody.contains(TaskQueueEventBus.EVENT_AS_JSON));
+    assertTrue(taskQueueBody.contains(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON));
     assertTrue(taskQueueBody.contains("event as Json"));
   }
 

@@ -26,7 +26,7 @@ import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
  *
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
+public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
   public static final String TASK_QUEUE = "taskQueue";
   public static final String EVENT = "event";
   public static final String EVENT_AS_JSON = "eventJson";
