@@ -1,8 +1,8 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.common.ActionEvent;
-import com.clouway.common.ActionEventHandler;
-import com.clouway.common.DefaultTaskQueueAsyncTask;
+import com.clouway.asynctaskscheduler.common.ActionEvent;
+import com.clouway.asynctaskscheduler.common.ActionEventHandler;
+import com.clouway.asynctaskscheduler.common.DefaultTaskQueueAsyncTask;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
@@ -19,11 +19,11 @@ import static junit.framework.Assert.assertNotNull;
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class FooDispatcherTest {
+public class RoutingDispatcherTest {
 
 
   @Inject
-  private FooDispatcher dispatcher;
+  private RoutingDispatcher dispatcher;
 
   @Inject
   private Gson gson;
@@ -63,7 +63,7 @@ public class FooDispatcherTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotDispatchAsyncEventWhenEventClassDoesNotRepresentAsyncEvent() throws Exception {
-    eventClassAsString = FooDispatcherTest.class.getName();
+    eventClassAsString = RoutingDispatcherTest.class.getName();
     dispatcher.dispatchAsyncEvent(eventClassAsString, eventAsJson);
   }
 

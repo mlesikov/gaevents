@@ -1,8 +1,8 @@
 package com.clouway.asynctaskscheduler.gae;
 
 import com.clouway.asynctaskscheduler.spi.AsyncEvent;
-import com.clouway.common.ActionEvent;
-import com.clouway.common.TaskQueueParamParser;
+import com.clouway.asynctaskscheduler.common.ActionEvent;
+import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;

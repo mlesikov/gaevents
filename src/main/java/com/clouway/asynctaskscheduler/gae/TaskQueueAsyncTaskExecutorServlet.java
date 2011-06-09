@@ -20,10 +20,10 @@ import java.util.Map;
  */
 public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
   public static final String URL = "/worker/taskQueue";
-  private final FooDispatcher dispatcher;
+  private final RoutingDispatcher dispatcher;
 
   @Inject
-  public TaskQueueAsyncTaskExecutorServlet(FooDispatcher dispatcher) {
+  public TaskQueueAsyncTaskExecutorServlet(RoutingDispatcher dispatcher) {
     this.dispatcher = dispatcher;
   }
 

@@ -2,11 +2,11 @@ package com.clouway.asynctaskscheduler.gae;
 
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
-import com.clouway.common.ActionEvent;
-import com.clouway.common.CustomTaskQueueAsyncTask;
-import com.clouway.common.DefaultActionEvent;
-import com.clouway.common.DefaultTaskQueueAsyncTask;
-import com.clouway.common.TaskQueueParamParser;
+import com.clouway.asynctaskscheduler.common.ActionEvent;
+import com.clouway.asynctaskscheduler.common.CustomTaskQueueAsyncTask;
+import com.clouway.asynctaskscheduler.common.DefaultActionEvent;
+import com.clouway.asynctaskscheduler.common.DefaultTaskQueueAsyncTask;
+import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;

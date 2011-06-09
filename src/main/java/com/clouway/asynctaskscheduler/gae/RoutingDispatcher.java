@@ -15,13 +15,13 @@ import java.util.Map;
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class FooDispatcher {
+public class RoutingDispatcher {
 
   private final Injector injector;
   private final Gson gson;
 
   @Inject
-  public FooDispatcher(Injector injector, Gson gson) {
+  public RoutingDispatcher(Injector injector, Gson gson) {
     this.injector = injector;
     this.gson = gson;
   }
