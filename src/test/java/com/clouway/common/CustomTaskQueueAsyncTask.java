@@ -1,5 +1,6 @@
-package com.clouway.asynctaskscheduler.gae;
+package com.clouway.common;
 
+import com.clouway.asynctaskscheduler.gae.QueueName;
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskParams;
 
@@ -7,12 +8,11 @@ import com.clouway.asynctaskscheduler.spi.AsyncTaskParams;
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
 
-@QueueName(name = "test")
+@QueueName(name = "customTaskQueue")
 public class CustomTaskQueueAsyncTask implements AsyncTask {
-  public static final String CUSTOM_TASK_QUEUE_NAME = "custom_task_queue";
+  public static final String CUSTOM_TASK_QUEUE_NAME = "customTaskQueue";
 
   @Override
   public void execute(AsyncTaskParams params) {
-    //To change body of implemented methods use File | Settings | File Templates.
   }
 }

@@ -1,4 +1,4 @@
-package com.clouway.asynceventbus.gae;
+package com.clouway.common;
 
 import com.clouway.asynceventbus.spi.AsyncEventHandler;
 
@@ -7,6 +7,5 @@ import com.clouway.asynceventbus.spi.AsyncEventHandler;
  */
 public class DefaultActionEventHandler implements AsyncEventHandler {
   public void onDefaultAction(DefaultActionEvent event) {
-     //reindex contract
   }
 }

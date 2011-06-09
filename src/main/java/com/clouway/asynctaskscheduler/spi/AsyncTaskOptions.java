@@ -14,7 +14,7 @@ public class AsyncTaskOptions {
   private Map<String, String> params;
   private long delayMills = 0;
   private long executionDateMills = 0;
-  private AsyncEvent asyncEvent;
+  private AsyncEvent event;
 
 
   private AsyncTaskOptions() {
@@ -23,6 +23,9 @@ public class AsyncTaskOptions {
 
 
   public AsyncTaskOptions param(String name, String value) {
+    if (event != null) {
+      throw new IllegalArgumentException("parameters cannot be add to a " + this.getClass().getName() + " when event is provided!");
+    }
     params.put(name, value);
     return this;
   }
@@ -35,9 +38,9 @@ public class AsyncTaskOptions {
 
   }
 
-  public static AsyncTaskOptions event(AsyncEvent asyncEvent) {
+  public static AsyncTaskOptions event(AsyncEvent event) {
     AsyncTaskOptions taskOptions = new AsyncTaskOptions();
-    taskOptions.asyncEvent = asyncEvent;
+    taskOptions.event = event;
     taskOptions.params = Maps.newHashMap();
     return taskOptions;
   }
@@ -75,12 +78,12 @@ public class AsyncTaskOptions {
     return asyncTask.getName();
   }
 
-  public AsyncEvent getAsyncEvent() {
-    return asyncEvent;
+  public AsyncEvent getEvent() {
+    return event;
   }
 
   public boolean isEventTaskOption() {
-    if (asyncEvent != null) {
+    if (event != null) {
       return true;
     }
     return false;

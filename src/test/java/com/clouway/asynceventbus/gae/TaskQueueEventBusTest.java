@@ -1,11 +1,15 @@
 package com.clouway.asynceventbus.gae;
 
+import com.clouway.asynceventbus.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.gae.TaskQueueAsyncTaskScheduler;
+import com.clouway.common.ActionEvent;
+import com.clouway.common.TaskQueueParamParser;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
+import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -13,7 +17,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.google.appengine.repackaged.com.google.common.base.X.assertTrue;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -23,6 +29,9 @@ public class TaskQueueEventBusTest {
 
   @Inject
   private TaskQueueEventBus eventBus;
+
+  @Inject
+  private Gson gson;
 
   private final LocalServiceTestHelper helper =
           new LocalServiceTestHelper(new LocalTaskQueueTestConfig());
@@ -42,7 +51,7 @@ public class TaskQueueEventBusTest {
 
   @Test
   public void shouldAddTaskQueueToDefaultTaskQueueForExecutingHandlingTheFiredEvent() throws Exception {
-    DefaultActionEvent event = new DefaultActionEvent();
+    ActionEvent event = new ActionEvent("test");
     eventBus.fireEvent(event);
 
     QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
@@ -50,15 +59,15 @@ public class TaskQueueEventBusTest {
     assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
   }
 
-  private void assertEvent(String taskQueueBody, DefaultActionEvent event) {
-    assertTrue(taskQueueBody.contains(TaskQueueAsyncTaskScheduler.EVENT));
-    assertTrue(taskQueueBody.contains(event.getClass().getName()));
-    assertTrue(taskQueueBody.contains(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON));
-    assertTrue(taskQueueBody.contains("event as Json"));
+  private void assertEvent(String taskQueueBody, AsyncEvent event) throws UnsupportedEncodingException {
+    Map<String, String> params = TaskQueueParamParser.parse(taskQueueBody);
+    assertEquals(params.get(TaskQueueAsyncTaskScheduler.EVENT), event.getClass().getName());
+    assertEquals(params.get(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON), gson.toJson(event));
   }
 
   private QueueStateInfo getQueueStateInfo(String queueName) {
     LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
     return ltq.getQueueStateInfo().get(queueName);
   }
+
 }

@@ -1,5 +1,6 @@
 package com.clouway.asynctaskscheduler.gae;
 
+import com.clouway.asynceventbus.gae.GaeAsyncTaskEventsModule;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
 import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
@@ -24,6 +25,7 @@ public class GaeAsyncTasksModule extends AbstractModule {
   @Override
   protected void configure() {
     install(servlets);
+    install(new GaeAsyncTaskEventsModule());
   }
 
   @Provides

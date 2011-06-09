@@ -27,6 +27,9 @@ public class AsyncTaskParams {
   private Map<String, String[]> params;
 
   public AsyncTaskParams(Map<String, String[]> params) {
+    if (params == null) {
+      throw new IllegalArgumentException("params map cannot be null");
+    }
     this.params = params;
   }
 

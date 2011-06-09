@@ -1,20 +1,16 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynceventbus.spi.AsyncEvent;
-import com.clouway.asynceventbus.spi.AsyncEventHandler;
-import com.clouway.asynctaskscheduler.spi.AsyncTask;
-import com.clouway.asynctaskscheduler.spi.AsyncTaskParams;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 
 /**
@@ -24,13 +20,11 @@ import java.util.Map;
  */
 public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
   public static final String URL = "/worker/taskQueue";
-  private Injector injector;
-  private final Gson gson;
+  private final FooDispatcher dispatcher;
 
   @Inject
-  public TaskQueueAsyncTaskExecutorServlet(Injector injector, Gson gson) {
-    this.injector = injector;
-    this.gson = gson;
+  public TaskQueueAsyncTaskExecutorServlet(FooDispatcher dispatcher) {
+    this.dispatcher = dispatcher;
   }
 
   @Override
@@ -43,22 +37,25 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
 
     try {
 
-      String taskQueueName = request.getParameter(TaskQueueAsyncTaskScheduler.TASK_QUEUE);
+      String asyncTaskClass = getParameter(request, TaskQueueAsyncTaskScheduler.TASK_QUEUE);
 
-      String eventClassAsString = request.getParameter(TaskQueueAsyncTaskScheduler.EVENT);
-      String eventAsJson = request.getParameter(TaskQueueAsyncTaskScheduler.EVENT);
+      //event details
+      String eventClassAsString = getParameter(request, TaskQueueAsyncTaskScheduler.EVENT);
+      String eventAsJson = getParameter(request, TaskQueueAsyncTaskScheduler.EVENT);
 
-
+      //if event is passed then it should be dispatched to it's handler
       if (!Strings.isNullOrEmpty(eventClassAsString) && !Strings.isNullOrEmpty(eventAsJson)) {
 
-        dispatchAsyncEvent(eventClassAsString, eventAsJson);
+        dispatcher.dispatchAsyncEvent(eventClassAsString, eventAsJson);
 
-      } else if (!Strings.isNullOrEmpty(taskQueueName)) {
+        // if asyncTask is provided it should be executed
+      } else if (!Strings.isNullOrEmpty(asyncTaskClass)) {
 
-        executeAsyncTask(request, taskQueueName);
+        Map<String, String[]> params = Maps.newHashMap(request.getParameterMap());
+
+        dispatcher.dispatchAsyncTask(params, asyncTaskClass);
 
       }
-
 
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
@@ -66,37 +63,17 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
 
   }
 
-  protected void dispatchAsyncEvent(String eventClassAsString, String eventAsJson) throws ClassNotFoundException {
-    Class<?> eventClass = Class.forName(eventClassAsString);
+  private String getParameter(HttpServletRequest request, String pramName) throws UnsupportedEncodingException {
+    String param = request.getParameter(pramName);
 
-    if(!AsyncEvent.class.getName().equals(eventClass.getName())){
-      throw new IllegalArgumentException("No AsyncEvent class provided.");
-    }
+    if (param != null) {
 
-    AsyncEvent<AsyncEventHandler> event = (AsyncEvent) gson.fromJson(eventAsJson, eventClass);
-
-    Class<? extends AsyncEventHandler> evenHandlerClass = event.getAssociatedHandlerClass();
-
-    AsyncEventHandler handler = injector.getInstance(evenHandlerClass);
-
-    event.dispatch(handler);
-  }
-
-  private void executeAsyncTask(HttpServletRequest request, String taskQueueName) throws ClassNotFoundException {
-
-    Class<?> taskQueueClass = Class.forName(taskQueueName);
-
-    Object object = injector.getInstance(taskQueueClass);
-
-    if (object instanceof AsyncTask) {
-
-      Map<String, String[]> params = Maps.newHashMap(request.getParameterMap());
-
-      AsyncTask taskQueue = (AsyncTask) object;
-
-      taskQueue.execute(new AsyncTaskParams(params));
+      String decodedParam = URLDecoder.decode(param, "UTF8");
+      return decodedParam;
 
     }
+    return null;
   }
+
 }
 

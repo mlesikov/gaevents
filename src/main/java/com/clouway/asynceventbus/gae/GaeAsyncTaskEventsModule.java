@@ -20,4 +20,14 @@ public class GaeAsyncTaskEventsModule extends AbstractModule {
     return new TaskQueueEventBus(asyncTaskScheduler);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof GaeAsyncTaskEventsModule;
+  }
+
+  @Override
+  public int hashCode() {
+    return GaeAsyncTaskEventsModule.class.hashCode();
+  }
+
 }

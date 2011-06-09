@@ -8,6 +8,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,17 @@ import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
  * <p/>
  * example usage :
  * taskScheduler
- * .add(task(AsyncTaskImpl.class)
+ * .add(task(AsyncTaskImpl)
  * .param("name", "param value"))
  * .now();
+ * <p/>
+ * AsyncTaskImpl implements {@link com.clouway.asynctaskscheduler.spi.AsyncTask}
+ * <p/>
+ * taskScheduler
+ * .add(event(AsyncEventImpl))
+ * .now();
+ * <p/>
+ * AsyncEventImpl implements {@link com.clouway.asynceventbus.spi.AsyncEvent}
  *
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
@@ -34,6 +43,7 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
   private List<AsyncTaskOptions> taskOptions;
   private final Gson gson;
 
+  @Inject
   public TaskQueueAsyncTaskScheduler(Gson gson) {
     this.gson = gson;
     this.taskOptions = Lists.newArrayList();
@@ -59,9 +69,14 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
     }
   }
 
+  /**
+   * Adds Task queue options for an async even({@link com.clouway.asynceventbus.spi.AsyncEvent})
+   *
+   * @param taskOptions
+   */
   private void addEventTaskQueueOption(AsyncTaskOptions taskOptions) {
 
-    Queue queue = getQueue(taskOptions.getAsyncEvent().getClass());
+    Queue queue = getQueue(taskOptions.getEvent().getClass());
 
     TaskOptions task = createEventTaskOptions(taskOptions);
 
@@ -72,13 +87,19 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
   }
 
+  /**
+   * Creates event task options
+   *
+   * @param taskOptions
+   * @return
+   */
   private TaskOptions createEventTaskOptions(AsyncTaskOptions taskOptions) {
     TaskOptions task;
     task = withUrl(TaskQueueAsyncTaskExecutorServlet.URL);
 
     //main task queue parameter
-    task.param(EVENT, taskOptions.getAsyncEvent().getClass().getName());
-    task.param(EVENT_AS_JSON, gson.toJson(taskOptions.getAsyncEvent()));
+    task.param(EVENT, taskOptions.getEvent().getClass().getName());
+    task.param(EVENT_AS_JSON, gson.toJson(taskOptions.getEvent()).toString());
 
     //adds all other parameters
     task = addParams(task, taskOptions.getParams());
@@ -102,6 +123,12 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
     queue.add(task);
   }
 
+  /**
+   * Sets the execution date to the task queue
+   *
+   * @param taskOptions
+   * @param task
+   */
   private void setExecutionDate(AsyncTaskOptions taskOptions, TaskOptions task) {
     if (taskOptions.getDelayMills() > 0) {
 
