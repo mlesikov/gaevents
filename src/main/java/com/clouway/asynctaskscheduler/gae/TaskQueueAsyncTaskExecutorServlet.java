@@ -41,7 +41,7 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
 
       //event details
       String eventClassAsString = getParameter(request, TaskQueueAsyncTaskScheduler.EVENT);
-      String eventAsJson = getParameter(request, TaskQueueAsyncTaskScheduler.EVENT);
+      String eventAsJson = getParameter(request, TaskQueueAsyncTaskScheduler.EVENT_AS_JSON);
 
       //if event is passed then it should be dispatched to it's handler
       if (!Strings.isNullOrEmpty(eventClassAsString) && !Strings.isNullOrEmpty(eventAsJson)) {
@@ -53,6 +53,7 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
 
         Map<String, String[]> params = Maps.newHashMap(request.getParameterMap());
 
+        //todo do not pass map here;
         dispatcher.dispatchAsyncTask(params, asyncTaskClass);
 
       }

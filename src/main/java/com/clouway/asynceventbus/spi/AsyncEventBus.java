@@ -5,8 +5,6 @@ package com.clouway.asynceventbus.spi;
  */
 public interface AsyncEventBus {
 
-
-
   /**
    * Fires the given async event to the handlers listening to the event's type.
    * <p>
