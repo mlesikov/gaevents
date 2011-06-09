@@ -1,6 +1,7 @@
 package com.clouway.asynctaskscheduler.gae;
 
 import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
+import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provides;
@@ -26,8 +27,8 @@ public class GaeAsyncTasksModule extends AbstractModule {
   }
 
   @Provides
-  public AsyncTaskScheduler getAsyncTaskScheduler() {
-    return new TaskQueueAsyncTaskScheduler();
+  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson) {
+    return new TaskQueueAsyncTaskScheduler(gson);
   }
 
   @Override

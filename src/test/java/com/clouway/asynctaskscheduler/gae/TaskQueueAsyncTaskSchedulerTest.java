@@ -22,7 +22,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
   private final LocalServiceTestHelper helper =
           new LocalServiceTestHelper(new LocalTaskQueueTestConfig());
 
-  private TaskQueueAsyncTaskScheduler taskScheduler = new TaskQueueAsyncTaskScheduler();
+  private TaskQueueAsyncTaskScheduler taskScheduler = new TaskQueueAsyncTaskScheduler(null);
 
   @Before
   public void setUp() {
