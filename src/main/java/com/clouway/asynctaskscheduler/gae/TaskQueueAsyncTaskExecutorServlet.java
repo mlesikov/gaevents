@@ -2,7 +2,6 @@ package com.clouway.asynctaskscheduler.gae;
 
 import com.clouway.asynceventbus.spi.AsyncEvent;
 import com.clouway.asynceventbus.spi.AsyncEventHandler;
-import com.clouway.asynceventbus.spi.EventHandler;
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskParams;
 import com.google.common.base.Strings;
@@ -67,30 +66,25 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
 
   }
 
-  private void dispatchAsyncEvent(String eventClassAsString, String eventAsJson) throws ClassNotFoundException {
+  protected void dispatchAsyncEvent(String eventClassAsString, String eventAsJson) throws ClassNotFoundException {
+    Class<?> eventClass = Class.forName(eventClassAsString);
 
-    Class eventClass = Class.forName(eventClassAsString);
-
-    AsyncEvent event = (AsyncEvent) gson.fromJson(eventAsJson, eventClass);
-
-    EventHandler annotation = (EventHandler) eventClass.getAnnotation(EventHandler.class);
-
-    if (annotation == null || annotation.type() != null) {
-      throw new IllegalArgumentException("Did you forget to put @EvenHandler annotation to a " + eventClass.getName());
+    if(!AsyncEvent.class.getName().equals(eventClass.getName())){
+      throw new IllegalArgumentException("No AsyncEvent class provided.");
     }
 
-    Class evenHandlerClass = annotation.type();
+    AsyncEvent<AsyncEventHandler> event = (AsyncEvent) gson.fromJson(eventAsJson, eventClass);
 
-    Object object = injector.getInstance(evenHandlerClass);
+    Class<? extends AsyncEventHandler> evenHandlerClass = event.getAssociatedHandlerClass();
 
-    AsyncEventHandler handler = (AsyncEventHandler) object;
+    AsyncEventHandler handler = injector.getInstance(evenHandlerClass);
 
     event.dispatch(handler);
   }
 
   private void executeAsyncTask(HttpServletRequest request, String taskQueueName) throws ClassNotFoundException {
 
-    Class taskQueueClass = Class.forName(taskQueueName);
+    Class<?> taskQueueClass = Class.forName(taskQueueName);
 
     Object object = injector.getInstance(taskQueueClass);
 
