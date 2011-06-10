@@ -1,6 +1,9 @@
 package com.clouway.asynctaskscheduler.spi;
 
 /**
+ * Async Event that is fired to dispatch it's handler.
+ *
+ * The implemetation must have Default constructor
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
 public interface AsyncEvent<H extends AsyncEventHandler> {
