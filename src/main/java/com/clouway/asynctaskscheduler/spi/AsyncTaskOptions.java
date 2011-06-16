@@ -24,8 +24,9 @@ public class AsyncTaskOptions {
   public AsyncTaskOptions param(String name, String value) {
     if (event != null) {
       throw new IllegalArgumentException("parameters cannot be add to a " + this.getClass().getName() + " when event is provided!");
+    } else if (name != null && value != null) {
+      params.put(name, value);
     }
-    params.put(name, value);
     return this;
   }
 

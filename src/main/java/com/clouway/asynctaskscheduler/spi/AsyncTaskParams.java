@@ -50,7 +50,7 @@ public class AsyncTaskParams {
    * @return the value of the parameter as String
    */
   public String getString(String key) {
-    return params.get(key)[0];
+    return findParam(key);
   }
 
   /**
@@ -60,7 +60,7 @@ public class AsyncTaskParams {
    * @return the value of the parameter as Integer
    */
   public Integer getInteger(String key) {
-    return Integer.parseInt(params.get(key)[0]);
+    return Integer.parseInt(findParam(key));
   }
 
   /**
@@ -70,12 +70,22 @@ public class AsyncTaskParams {
    * @return the value of the parameter as Double
    */
   public Double getDouble(String key) {
-    return Double.parseDouble(params.get(key)[0]);
-  }
 
+    return Double.parseDouble(findParam(key));
+  }
 
   private static String[] array(String... array) {
     return array;
+  }
+
+
+  private String findParam(String key) {
+    String[] values = params.get(key);
+    if (values == null) {
+      return null;
+    } else {
+      return params.get(key)[0];
+    }
   }
 
 }

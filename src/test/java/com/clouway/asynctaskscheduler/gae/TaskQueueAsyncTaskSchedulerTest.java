@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static com.clouway.asynctaskscheduler.spi.AsyncTaskOptions.task;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -104,6 +105,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
     assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT, event.getClass().getName());
     assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT_AS_JSON, gson.toJson(event));
   }
+
   @Test
   public void shouldAddTaskToCustomTaskQueueWhenTaskOptionsForEventIsProvided() throws Exception {
     DefaultActionEvent event = new DefaultActionEvent("test message");
@@ -113,6 +115,19 @@ public class TaskQueueAsyncTaskSchedulerTest {
     QueueStateInfo qsi = getQueueStateInfo(DefaultActionEvent.CUSTOM_TASK_QUEUE_NAME);
     assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT, event.getClass().getName());
     assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT_AS_JSON, gson.toJson(event));
+  }
+
+  @Test
+  public void shouldNotAddParamsTotheTaskWhenParamNameOrParamValueAreNull() throws Exception {
+    DefaultActionEvent event = new DefaultActionEvent("test message");
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)
+            .param(null, "value")
+            .param("key", null)
+    ).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertNotContainsParams(qsi.getTaskInfo().get(0).getBody(), null);
+    assertNotContainsParams(qsi.getTaskInfo().get(0).getBody(), "key");
   }
 
   @Test
@@ -129,6 +144,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
     assertEquals(1, customQueueStateInfo.getTaskInfo().size());
     assertTaskQueueName(customQueueStateInfo.getTaskInfo().get(0).getBody(), CustomTaskQueueAsyncTask.class);
 
+  }
+
+  private void assertNotContainsParams(String body, String key) throws UnsupportedEncodingException {
+    Map<String, String> params = TaskQueueParamParser.parse(body);
+    assertFalse(params.containsKey(key));
   }
 
 
