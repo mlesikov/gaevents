@@ -5,9 +5,11 @@ import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
 import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
+
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -29,7 +31,7 @@ public class BackgroundTasksModule extends AbstractModule {
 
 
   @Provides
-  public AsyncEventBus getAsyncEventBus(AsyncTaskScheduler asyncTaskScheduler) {
+  public AsyncEventBus getAsyncEventBus(Provider<AsyncTaskScheduler> asyncTaskScheduler) {
     return new TaskQueueEventBus(asyncTaskScheduler);
   }
 

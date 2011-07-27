@@ -3,6 +3,7 @@ package com.clouway.asynctaskscheduler.gae;
 import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.common.ActionEvent;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
+import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -27,10 +28,12 @@ import static junit.framework.Assert.assertEquals;
 public class TaskQueueEventBusTest {
 
   @Inject
-  private TaskQueueEventBus eventBus;
+  private AsyncEventBus eventBus;
 
   @Inject
   private Gson gson;
+
+  private Injector injector;
 
   private final LocalServiceTestHelper helper =
           new LocalServiceTestHelper(new LocalTaskQueueTestConfig());
@@ -39,7 +42,7 @@ public class TaskQueueEventBusTest {
   @Before
   public void setUp() throws Exception {
     helper.setUp();
-    Injector injector = Guice.createInjector(new BackgroundTasksModule());
+    injector = Guice.createInjector(new BackgroundTasksModule());
     injector.injectMembers(this);
   }
 
@@ -55,6 +58,22 @@ public class TaskQueueEventBusTest {
 
     QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
     assertEquals(1, defaultQueueStateInfo.getTaskInfo().size());
+    assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
+  }
+
+  @Test
+  public void shouldAddOnlyTaskQueueToDefaultTaskQueueForExecutingHandlingTheFiredEvent() throws Exception {
+    ActionEvent event = new ActionEvent("test");
+    eventBus.fireEvent(event);
+
+    QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, defaultQueueStateInfo.getTaskInfo().size());
+    assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
+
+    eventBus.fireEvent(event);
+
+    defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(2, defaultQueueStateInfo.getTaskInfo().size());
     assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
   }
 
