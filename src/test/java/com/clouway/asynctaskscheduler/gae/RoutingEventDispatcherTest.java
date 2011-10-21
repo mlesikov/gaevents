@@ -59,7 +59,7 @@ public class RoutingEventDispatcherTest {
 
       @Override
       public EventListenerBindingsBuilder bindEventAdditionalEventListeners() {
-        return EventListenerBindingsBuilder.binnder().bind(ActionEvent.class, Lists.newArrayList(IndexingListener.class, TestEventListener.class));
+        return EventListenerBindingsBuilder.binnder().bind(ActionEvent.class, IndexingListener.class, TestEventListener.class);
       }
 
 

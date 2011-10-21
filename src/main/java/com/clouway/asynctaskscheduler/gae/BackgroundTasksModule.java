@@ -51,8 +51,8 @@ public class BackgroundTasksModule extends AbstractModule {
   public static class EventListenerBindingsBuilder {
     Map<Class<? extends AsyncEvent>, List<Class<? extends AsyncEventListener>>> map = Maps.newHashMap();
 
-    public EventListenerBindingsBuilder bind(Class<? extends AsyncEvent> eventClass, List<Class<? extends AsyncEventListener>> listenerClasses) {
-      map.put(eventClass, listenerClasses);
+    public EventListenerBindingsBuilder bind(Class<? extends AsyncEvent> eventClass, Class<? extends AsyncEventListener>... listenerClasses) {
+      map.put(eventClass, Lists.newArrayList(listenerClasses));
       return this;
     }
 
