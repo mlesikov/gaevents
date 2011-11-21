@@ -4,6 +4,8 @@ import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.common.ActionEvent;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
+import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
+import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -13,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,17 +41,20 @@ public class TaskQueueEventBusTest {
   private final LocalServiceTestHelper helper =
           new LocalServiceTestHelper(new LocalTaskQueueTestConfig());
 
+  private SimpleScope fakeRequestScope = new SimpleScope();
 
   @Before
   public void setUp() throws Exception {
     helper.setUp();
-    injector = Guice.createInjector(new BackgroundTasksModule());
+    injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope)));
     injector.injectMembers(this);
+    fakeRequestScope.enter();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
+    fakeRequestScope.exit();
   }
 
   @Test

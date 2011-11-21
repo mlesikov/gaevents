@@ -1,5 +1,7 @@
 package com.clouway.asynctaskscheduler.gae;
 
+import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
+import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.clouway.asynctaskscheduler.common.ActionEvent;
 import com.clouway.asynctaskscheduler.common.CustomTaskQueueAsyncTask;
 import com.clouway.asynctaskscheduler.common.DefaultActionEvent;
@@ -16,10 +18,13 @@ import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.util.Modules;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
@@ -39,6 +44,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
   @Inject
   private Gson gson;
 
+  @Inject
+  private Provider<HttpServletRequest> requestProvider;
+
+  private final SimpleScope fakeRequestScope = new SimpleScope();
+
   @Before
   public void setUp() {
     LocalTaskQueueTestConfig localTaskQueueTestConfig = new LocalTaskQueueTestConfig();
@@ -46,21 +56,47 @@ public class TaskQueueAsyncTaskSchedulerTest {
     helper = new LocalServiceTestHelper(localTaskQueueTestConfig);
 
     helper.setUp();
-    Injector injector = Guice.createInjector(new BackgroundTasksModule());
+    Injector injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope)));
     injector.injectMembers(this);
+
+    fakeRequestScope.enter();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
+
+    fakeRequestScope.exit();
+  }
+
+
+  @Test
+  public void injectExistingRequestParameters() throws InterruptedException, UnsupportedEncodingException {
+    requestProvider.get().setAttribute("SID", "SIDVALUE");
+
+    taskScheduler.add(task(DefaultTaskQueueAsyncTask.class)).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "SID", "SIDVALUE");
+  }
+
+  @Test
+  public void injectMultipleParameters() throws InterruptedException, UnsupportedEncodingException {
+    requestProvider.get().setAttribute("SID", "SIDVALUE");
+    requestProvider.get().setAttribute("Test", "AnotherValue");
+
+    taskScheduler.add(task(DefaultTaskQueueAsyncTask.class)).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "SID", "SIDVALUE");
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "Test", "AnotherValue");
   }
 
   @Test
   public void shouldAddTaskToTheDefaultTaskQueue() throws Exception {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
-    // give the task time to execute if tasks are actually enabled (which they
-    // aren't, but that's part of the test)
-    Thread.sleep(1000);
 
     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
     assertEquals(1, qsi.getTaskInfo().size());
@@ -76,9 +112,6 @@ public class TaskQueueAsyncTaskSchedulerTest {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)
             .param(paramName, paramValue))
             .now();
-    // give the task time to execute if tasks are actually enabled (which they
-    // aren't, but that's part of the test)
-    Thread.sleep(1000);
 
     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
 

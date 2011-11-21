@@ -10,6 +10,8 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -36,8 +38,8 @@ public class BackgroundTasksModule extends AbstractModule {
   }
 
   @Provides
-  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson) {
-    return new TaskQueueAsyncTaskScheduler(gson);
+  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson, Provider<HttpServletRequest> requestProvider) {
+    return new TaskQueueAsyncTaskScheduler(gson, requestProvider);
   }
 
   @Override
