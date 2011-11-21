@@ -41,12 +41,12 @@ public class BackgroundTasksModule extends AbstractModule {
    * Configures which listeners to be executed after handling of a given event
    * Should be override
    * and implement like this :
-   * EventListenerBindingsBuilder.binnder().bind(AsyncEvent.class,Lists.newArrayList(AsyncEventListenr.class,...))
+   * EventListenerBindingsBuilder.binder().bind(AsyncEvent.class,Lists.newArrayList(AsyncEventListenr.class,...))
    *
    * @return
    */
   public EventListenerBindingsBuilder bindEventAdditionalEventListeners() {
-    return EventListenerBindingsBuilder.binnder();
+    return EventListenerBindingsBuilder.binder();
   }
 
   public static class EventListenerBindingsBuilder {
@@ -58,7 +58,7 @@ public class BackgroundTasksModule extends AbstractModule {
     }
 
 
-    public static EventListenerBindingsBuilder binnder() {
+    public static EventListenerBindingsBuilder binder() {
       return new EventListenerBindingsBuilder();
     }
 
