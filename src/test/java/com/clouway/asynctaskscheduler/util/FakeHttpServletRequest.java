@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -32,6 +34,8 @@ public class FakeHttpServletRequest extends HttpServletRequestWrapper {
 
   public Map<String, Object> attrs = new HashMap<String, Object>();
 
+  public Map<String, String[]> requestParameters = new HashMap<String, String[]>();
+
   public FakeHttpServletRequest() {
     // Can't actually pass null here
     super(makeStub());
@@ -39,7 +43,7 @@ public class FakeHttpServletRequest extends HttpServletRequestWrapper {
 
   @Override
   public Map getParameterMap() {
-    return ImmutableMap.copyOf(attrs);
+    return ImmutableMap.copyOf(requestParameters);
   }
 
   @Override
@@ -49,11 +53,27 @@ public class FakeHttpServletRequest extends HttpServletRequestWrapper {
 
   @Override
   public void setAttribute(String key, Object value) {
-    attrs.put(key, new String[] { value.toString() });
+    attrs.put(key, value);
   }
 
   @Override
   public void removeAttribute(String key) {
     attrs.remove(key);
+  }
+
+  @Override
+  public Enumeration getAttributeNames() {
+    return new Enumeration<Object>() {
+      Iterator iterator = attrs.keySet().iterator();
+      @Override
+      public boolean hasMoreElements() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public Object nextElement() {
+        return iterator.next();
+      }
+    };
   }
 }

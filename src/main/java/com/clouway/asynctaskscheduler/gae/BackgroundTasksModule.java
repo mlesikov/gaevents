@@ -78,8 +78,8 @@ public class BackgroundTasksModule extends AbstractModule {
   }
 
   @Provides
-  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson, Provider<HttpServletRequest> requestProvider) {
-    return new TaskQueueAsyncTaskScheduler(gson, requestProvider);
+  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson) {
+    return new TaskQueueAsyncTaskScheduler(gson);
   }
 
 

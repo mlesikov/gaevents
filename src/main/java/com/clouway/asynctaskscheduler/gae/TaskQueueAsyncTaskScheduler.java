@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -44,12 +45,11 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
   private List<AsyncTaskOptions> taskOptions;
   private final Gson gson;
-  private final Provider<HttpServletRequest> requestProvider;
+
 
   @Inject
-  public TaskQueueAsyncTaskScheduler(Gson gson, Provider<HttpServletRequest> requestProvider) {
+  public TaskQueueAsyncTaskScheduler(Gson gson) {
     this.gson = gson;
-    this.requestProvider = requestProvider;
     this.taskOptions = Lists.newArrayList();
   }
 
@@ -199,12 +199,6 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     for (String key : params.keySet()) {
       task.param(key, params.get(key));
-    }
-
-    Map<String, String[]> requestMap = requestProvider.get().getParameterMap();
-    for (String key : requestMap.keySet()) {
-      String[] values = requestMap.get(key);
-      task.param(key, values[0]);
     }
 
     return task;

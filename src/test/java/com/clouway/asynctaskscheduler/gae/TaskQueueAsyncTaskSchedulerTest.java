@@ -1,7 +1,5 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
-import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.clouway.asynctaskscheduler.common.ActionEvent;
 import com.clouway.asynctaskscheduler.common.CustomTaskQueueAsyncTask;
 import com.clouway.asynctaskscheduler.common.DefaultActionEvent;
@@ -9,6 +7,8 @@ import com.clouway.asynctaskscheduler.common.DefaultTaskQueueAsyncTask;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
+import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
+import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -29,8 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import static com.clouway.asynctaskscheduler.spi.AsyncTaskOptions.task;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.*;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -49,6 +48,8 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
   private final SimpleScope fakeRequestScope = new SimpleScope();
 
+  private Injector injector;
+
   @Before
   public void setUp() {
     LocalTaskQueueTestConfig localTaskQueueTestConfig = new LocalTaskQueueTestConfig();
@@ -56,7 +57,9 @@ public class TaskQueueAsyncTaskSchedulerTest {
     helper = new LocalServiceTestHelper(localTaskQueueTestConfig);
 
     helper.setUp();
-    Injector injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope)));
+    injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(
+            new FakeRequestScopeModule(fakeRequestScope))
+    );
     injector.injectMembers(this);
 
     fakeRequestScope.enter();
@@ -67,31 +70,6 @@ public class TaskQueueAsyncTaskSchedulerTest {
     helper.tearDown();
 
     fakeRequestScope.exit();
-  }
-
-
-  @Test
-  public void injectExistingRequestParameters() throws InterruptedException, UnsupportedEncodingException {
-    requestProvider.get().setAttribute("SID", "SIDVALUE");
-
-    taskScheduler.add(task(DefaultTaskQueueAsyncTask.class)).now();
-
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-
-    assertParams(qsi.getTaskInfo().get(0).getBody(), "SID", "SIDVALUE");
-  }
-
-  @Test
-  public void injectMultipleParameters() throws InterruptedException, UnsupportedEncodingException {
-    requestProvider.get().setAttribute("SID", "SIDVALUE");
-    requestProvider.get().setAttribute("Test", "AnotherValue");
-
-    taskScheduler.add(task(DefaultTaskQueueAsyncTask.class)).now();
-
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-
-    assertParams(qsi.getTaskInfo().get(0).getBody(), "SID", "SIDVALUE");
-    assertParams(qsi.getTaskInfo().get(0).getBody(), "Test", "AnotherValue");
   }
 
   @Test
