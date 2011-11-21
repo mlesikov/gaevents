@@ -20,11 +20,13 @@ import java.util.Map;
  */
 public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
   public static final String URL = "/worker/taskQueue";
-  private final RoutingDispatcher dispatcher;
+  private final RoutingEventDispatcher eventDispatcher;
+  private final RoutingTaskDispatcher taskDispatcher;
 
   @Inject
-  public TaskQueueAsyncTaskExecutorServlet(RoutingDispatcher dispatcher) {
-    this.dispatcher = dispatcher;
+  public TaskQueueAsyncTaskExecutorServlet(RoutingEventDispatcher eventDispatcher,RoutingTaskDispatcher taskDispatcher) {
+    this.eventDispatcher = eventDispatcher;
+    this.taskDispatcher = taskDispatcher;
   }
 
   @Override
@@ -46,7 +48,7 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
       //if event is passed then it should be dispatched to it's handler
       if (!Strings.isNullOrEmpty(eventClassAsString) && !Strings.isNullOrEmpty(eventAsJson)) {
 
-        dispatcher.dispatchAsyncEvent(eventClassAsString, eventAsJson);
+        eventDispatcher.dispatchAsyncEvent(eventClassAsString, eventAsJson);
 
         // if asyncTask is provided it should be executed
       } else if (!Strings.isNullOrEmpty(asyncTaskClass)) {
@@ -54,7 +56,7 @@ public class TaskQueueAsyncTaskExecutorServlet extends HttpServlet {
         Map<String, String[]> params = Maps.newHashMap(request.getParameterMap());
 
         //todo do not pass map here;
-        dispatcher.dispatchAsyncTask(params, asyncTaskClass);
+        taskDispatcher.dispatchAsyncTask(params, asyncTaskClass);
 
       }
 
