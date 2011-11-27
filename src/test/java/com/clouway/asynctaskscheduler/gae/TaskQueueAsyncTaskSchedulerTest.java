@@ -83,6 +83,16 @@ public class TaskQueueAsyncTaskSchedulerTest {
   }
 
   @Test
+  public void namedTasksCouldBeAddedOnlyOne() {
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).named("work-index-1")).now();
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).named("work-index-1")).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getTaskInfo().size());
+
+  }
+
+  @Test
   public void shouldAddTaskToTheDefaultTaskQueueWithTheGivenParams() throws Exception {
     String paramName = "paramName";
     String paramValue = "paramValue";

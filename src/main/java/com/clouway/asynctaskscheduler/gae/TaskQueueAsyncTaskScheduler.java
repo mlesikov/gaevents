@@ -4,6 +4,7 @@ import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskAlreadyExistsException;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -27,6 +28,16 @@ import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
  * .add(task(AsyncTaskImpl)
  * .param("name", "param value"))
  * .now();
+ * <p/>
+ *
+ * Task scheduler also could be used for implementation of fork-join queues by using named tasks. Here is an
+ * example how this could be accomplished:
+ * <pre>
+ *   Long id = datastore.put(new MyWork("revenues", 10)).getId();
+ *   taskScheduler.add(task(RevenueSummarizer).named("revenues-2011-10-10 12:30:00").param("revenueDate", "2011-10-10 12:30:00")).now();
+ *   ....
+ * </pre>
+ * and in the RevenueSummarizer task you can join all of the inserted items for the provided minute.
  * <p/>
  * AsyncTaskImpl implements {@link com.clouway.asynctaskscheduler.spi.AsyncTask}
  * <p/>
@@ -124,7 +135,12 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     setExecutionDate(taskOptions, task);
 
-    queue.add(task);
+    try {
+      queue.add(task);
+    } catch (TaskAlreadyExistsException e) {
+      // Fan-In magic goes here
+    }
+
   }
 
   /**
@@ -160,6 +176,12 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     //adds all other parameters
     task = addParams(task, taskOptions.getParams());
+
+    // task was named? so we have to add it as name and we have to emit
+    // the TaskAlreadyExistsException when task is added.
+    if (taskOptions.getTaskName() != null) {
+      task.taskName(taskOptions.getTaskName());
+    }
 
     return task;
   }

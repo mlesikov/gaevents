@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * AsyncTaskOptions is an options class which is used for holding of the optional information for the Task.
+ *
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
 public class AsyncTaskOptions {
@@ -14,6 +16,7 @@ public class AsyncTaskOptions {
   private long delayMills = 0;
   private long executionDateMills = 0;
   private AsyncEvent event;
+  private String taskName;
 
 
   private AsyncTaskOptions() {
@@ -58,6 +61,11 @@ public class AsyncTaskOptions {
     return this;
   }
 
+  public AsyncTaskOptions named(String taskName) {
+    this.taskName = taskName;
+    return this;
+  }
+
   public Class<? extends AsyncTask> getAsyncTask() {
     return asyncTask;
   }
@@ -80,6 +88,10 @@ public class AsyncTaskOptions {
 
   public AsyncEvent getEvent() {
     return event;
+  }
+
+  public String getTaskName() {
+    return taskName;
   }
 
   public boolean isEventTaskOption() {
