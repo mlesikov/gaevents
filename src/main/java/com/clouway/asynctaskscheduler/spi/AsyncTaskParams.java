@@ -88,4 +88,11 @@ public class AsyncTaskParams {
     }
   }
 
+  public Long getLong(String key) {
+    String valueAsString = findParam(key);
+    if (valueAsString == null) {
+      return null;
+    }
+    return Long.valueOf(findParam(key));
+  }
 }
