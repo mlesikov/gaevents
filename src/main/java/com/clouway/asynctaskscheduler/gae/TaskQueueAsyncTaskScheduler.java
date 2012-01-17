@@ -10,10 +10,8 @@ import com.google.appengine.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,11 +54,13 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
   private List<AsyncTaskOptions> taskOptions;
   private final Gson gson;
+  private final CommonParamBinder commonParamBinder;
 
 
   @Inject
-  public TaskQueueAsyncTaskScheduler(Gson gson) {
+  public TaskQueueAsyncTaskScheduler(Gson gson, CommonParamBinder commonParamBinder) {
     this.gson = gson;
+    this.commonParamBinder = commonParamBinder;
     this.taskOptions = Lists.newArrayList();
   }
 
@@ -69,7 +69,19 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
    * builds the task queue form the task options
    */
   public void now() {
+
+    Map<String, String> commonParams = new HashMap<String, String>();
+    commonParamBinder.bindCommonParams(commonParams);
+
     for (AsyncTaskOptions taskOption : taskOptions) {
+
+      /**
+       * We need to add and common parameters, before we schedule
+       * task for execution
+       */
+      for (String paramKey : commonParams.keySet()) {
+        taskOption.param(paramKey, commonParams.get(paramKey));
+      }
 
       if (taskOption.isEventTaskOption()) {
 

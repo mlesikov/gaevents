@@ -18,7 +18,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,10 +77,9 @@ public class BackgroundTasksModule extends AbstractModule {
   }
 
   @Provides
-  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson) {
-    return new TaskQueueAsyncTaskScheduler(gson);
+  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson, Provider<CommonParamBinder> commonParamBinderProvider) {
+    return new TaskQueueAsyncTaskScheduler(gson, commonParamBinderProvider.get());
   }
-
 
   @Override
   public boolean equals(Object o) {

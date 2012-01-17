@@ -20,14 +20,10 @@ public class AsyncTaskOptions {
 
 
   private AsyncTaskOptions() {
-
   }
 
-
   public AsyncTaskOptions param(String name, String value) {
-    if (event != null) {
-      throw new IllegalArgumentException("parameters cannot be add to a " + this.getClass().getName() + " when event is provided!");
-    } else if (name != null && value != null) {
+    if (name != null && value != null) {
       params.put(name, value);
     }
     return this;
@@ -47,7 +43,6 @@ public class AsyncTaskOptions {
     taskOptions.params = Maps.newHashMap();
     return taskOptions;
   }
-
 
   public AsyncTaskOptions delay(long delayMills) {
     this.delayMills = delayMills;
