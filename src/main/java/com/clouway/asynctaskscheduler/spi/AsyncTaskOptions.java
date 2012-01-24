@@ -2,6 +2,7 @@ package com.clouway.asynctaskscheduler.spi;
 
 import com.google.common.collect.Maps;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -25,6 +26,13 @@ public class AsyncTaskOptions {
   public AsyncTaskOptions param(String name, String value) {
     if (name != null && value != null) {
       params.put(name, value);
+    }
+    return this;
+  }
+
+  public AsyncTaskOptions param(String name, Date value) {
+    if (name != null && value != null) {
+      params.put(name, new SimpleDateFormat(AsyncTaskParams.DEFAULT_DATE_AND_TIME_PATTERN).format(value));
     }
     return this;
   }

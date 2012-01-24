@@ -65,6 +65,7 @@ public class AsyncTaskParamsTest {
   @Test
   public void getValueAsDate() throws ParseException {
     assertThat("different date value was returned?",AsyncTaskParams.with("date", "12-01-2012").getDate("date"), is(equalTo(newDateAndTime(2012,1,12,0,0,0,0))));
+    assertThat("different date value was returned?",AsyncTaskParams.with("date", "12-01-2012 asd").getDate("date"), is(equalTo(newDateAndTime(2012,1,12,0,0,0,0))));
   }
 
   @Test
