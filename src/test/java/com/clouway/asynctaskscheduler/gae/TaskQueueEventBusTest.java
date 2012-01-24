@@ -47,7 +47,7 @@ public class TaskQueueEventBusTest {
   @Before
   public void setUp() throws Exception {
     helper.setUp();
-    injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope, new FakeCommonParamBinder())));
+    injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope)));
     injector.injectMembers(this);
     fakeRequestScope.enter();
   }
