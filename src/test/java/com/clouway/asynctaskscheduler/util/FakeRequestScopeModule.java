@@ -1,6 +1,5 @@
 package com.clouway.asynctaskscheduler.util;
 
-import com.clouway.asynctaskscheduler.gae.CommonParamBinder;
 import com.google.inject.AbstractModule;
 import com.google.inject.servlet.RequestScoped;
 
@@ -21,11 +20,8 @@ public class FakeRequestScopeModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bindScope(RequestScoped.class, fakeRequestScope);
     bind(HttpServletRequest.class)
             .to(FakeHttpServletRequest.class)
             .in(RequestScoped.class);
-
-    bind(CommonParamBinder.class).toInstance(binder);
   }
 }

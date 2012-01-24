@@ -16,6 +16,7 @@ import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.gson.Gson;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -30,7 +31,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import static com.clouway.asynctaskscheduler.spi.AsyncTaskOptions.task;
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -63,7 +65,14 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     helper.setUp();
     injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(
-            new FakeRequestScopeModule(fakeRequestScope, fakeBinder))
+            new FakeRequestScopeModule(fakeRequestScope, fakeBinder),
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(CommonParamBinder.class).toInstance(fakeBinder);
+              }
+
+            })
     );
     injector.injectMembers(this);
 
