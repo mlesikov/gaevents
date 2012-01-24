@@ -18,6 +18,7 @@ public class FakeRequestScopeModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bindScope(RequestScoped.class, fakeRequestScope);
     bind(HttpServletRequest.class)
             .to(FakeHttpServletRequest.class)
             .in(RequestScoped.class);
