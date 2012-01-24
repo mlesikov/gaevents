@@ -4,6 +4,7 @@ import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.common.ActionEvent;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
+import com.clouway.asynctaskscheduler.util.FakeCommonParamBinder;
 import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
 import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -46,7 +47,7 @@ public class TaskQueueEventBusTest {
   @Before
   public void setUp() throws Exception {
     helper.setUp();
-    injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope)));
+    injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope, new FakeCommonParamBinder())));
     injector.injectMembers(this);
     fakeRequestScope.enter();
   }

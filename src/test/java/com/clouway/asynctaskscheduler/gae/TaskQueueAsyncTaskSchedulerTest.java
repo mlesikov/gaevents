@@ -7,6 +7,7 @@ import com.clouway.asynctaskscheduler.common.DefaultTaskQueueAsyncTask;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
+import com.clouway.asynctaskscheduler.util.FakeCommonParamBinder;
 import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
 import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -15,6 +16,7 @@ import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.gson.Gson;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -29,7 +31,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import static com.clouway.asynctaskscheduler.spi.AsyncTaskOptions.task;
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -50,15 +53,26 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
   private Injector injector;
 
+  private FakeCommonParamBinder fakeBinder;
+
   @Before
   public void setUp() {
     LocalTaskQueueTestConfig localTaskQueueTestConfig = new LocalTaskQueueTestConfig();
     localTaskQueueTestConfig.setQueueXmlPath("src/test/java/queue.xml");
     helper = new LocalServiceTestHelper(localTaskQueueTestConfig);
 
+    fakeBinder = new FakeCommonParamBinder();
+
     helper.setUp();
     injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(
-            new FakeRequestScopeModule(fakeRequestScope))
+            new FakeRequestScopeModule(fakeRequestScope),
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(CommonParamBinder.class).toInstance(fakeBinder);
+              }
+
+            })
     );
     injector.injectMembers(this);
 
@@ -70,6 +84,18 @@ public class TaskQueueAsyncTaskSchedulerTest {
     helper.tearDown();
 
     fakeRequestScope.exit();
+  }
+
+  @Test
+  public void addCommonParamsTaskQueue() throws Exception {
+    fakeBinder.pretendCommonParamsIs("param1", "value1");
+    fakeBinder.pretendCommonParamsIs("param2", "value2");
+
+    taskScheduler.add(AsyncTaskOptions.event(new ActionEvent("test message"))).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "param1", "value1");
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "param2", "value2");
   }
 
   @Test
@@ -104,16 +130,6 @@ public class TaskQueueAsyncTaskSchedulerTest {
     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
 
     assertParams(qsi.getTaskInfo().get(0).getBody(), paramName, paramValue);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAddTaskTaskQueueWhenTaskOptionsForEventIsProvidedAndParamsAreAdded() throws Exception {
-    String paramName = "paramName";
-    String paramValue = "paramValue";
-
-    taskScheduler.add(AsyncTaskOptions.event(new ActionEvent())
-            .param(paramName, paramValue))
-            .now();
   }
 
   @Test
