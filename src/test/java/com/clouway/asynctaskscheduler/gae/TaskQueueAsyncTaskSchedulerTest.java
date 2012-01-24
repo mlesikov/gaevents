@@ -65,7 +65,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     helper.setUp();
     injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(
-            new FakeRequestScopeModule(fakeRequestScope, fakeBinder),
+            new FakeRequestScopeModule(fakeRequestScope),
             new AbstractModule() {
               @Override
               protected void configure() {

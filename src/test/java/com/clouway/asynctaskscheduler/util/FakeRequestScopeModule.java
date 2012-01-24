@@ -10,12 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 */
 public class FakeRequestScopeModule extends AbstractModule {
   private final SimpleScope fakeRequestScope;
-  private final FakeCommonParamBinder binder;
 
-  public FakeRequestScopeModule(SimpleScope fakeRequestScope,FakeCommonParamBinder binder) {
+  public FakeRequestScopeModule(SimpleScope fakeRequestScope) {
 
     this.fakeRequestScope = fakeRequestScope;
-    this.binder = binder;
   }
 
   @Override
