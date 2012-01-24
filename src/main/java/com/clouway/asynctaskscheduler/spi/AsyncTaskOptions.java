@@ -30,9 +30,29 @@ public class AsyncTaskOptions {
     return this;
   }
 
-  public AsyncTaskOptions param(String name, Date value) {
+  public AsyncTaskOptions paramDate(String name, Date value) {
     if (name != null && value != null) {
       params.put(name, new SimpleDateFormat(AsyncTaskParams.DEFAULT_DATE_AND_TIME_PATTERN).format(value));
+    }
+    return this;
+  }
+
+
+  public <T> AsyncTaskOptions param(String name, T value, Class<? extends ParamFormat<T>> paramFormatClass) {
+    if (name != null && value != null && paramFormatClass != null) {
+      try {
+
+        ParamFormat<T> paramFormat = paramFormatClass.newInstance();
+
+        String valueAsString = paramFormat.format(value);
+
+        params.put(name, valueAsString);
+
+      } catch (InstantiationException e) {
+        throw new IllegalArgumentException(e);
+      } catch (IllegalAccessException e) {
+        throw new IllegalArgumentException(e);
+      }
     }
     return this;
   }

@@ -1,11 +1,11 @@
 package com.clouway.asynctaskscheduler.spi;
 
+import com.clouway.asynctaskscheduler.util.SampleTestDateFormat;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
 
+import static com.clouway.asynctaskscheduler.util.DateUtil.newDateAndTime;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -54,12 +54,12 @@ public class AsyncTaskParamsTest {
 
   @Test
   public void formatAsDate() {
-    assertThat("different date value was returned?",AsyncTaskParams.with("date", "10/11/2011").format("date", SampleDateFormat.class), is(equalTo(newDateAndTime(2011,11,10,0,0,0,0))));
+    assertThat("different date value was returned?",AsyncTaskParams.with("date", "10/11/2011").format("date", SampleTestDateFormat.class), is(equalTo(newDateAndTime(2011,11,10,0,0,0,0))));
   }
 
   @Test
   public void unknownValuesAreReturnedAsNullWhenTryingToFormat() {
-    assertThat(AsyncTaskParams.with("test","test").format("date", SampleDateFormat.class), is(nullValue()));
+    assertThat(AsyncTaskParams.with("test","test").format("date", SampleTestDateFormat.class), is(nullValue()));
   }
 
   @Test
@@ -101,18 +101,6 @@ public class AsyncTaskParamsTest {
     } catch (ParseException e) {
 
     }
-  }
-
-   public static Date newDateAndTime(int year, int month, int day, int hour, int minute, int second, int millisecond) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.set(Calendar.YEAR, year);
-    calendar.set(Calendar.MONTH, month - 1);
-    calendar.set(Calendar.DAY_OF_MONTH, day);
-    calendar.set(Calendar.HOUR_OF_DAY, hour);
-    calendar.set(Calendar.MINUTE, minute);
-    calendar.set(Calendar.SECOND, second);
-    calendar.set(Calendar.MILLISECOND, millisecond);
-    return calendar.getTime();
   }
 
 }

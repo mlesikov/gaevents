@@ -9,6 +9,7 @@ import com.clouway.asynctaskscheduler.spi.AsyncTask;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
 import com.clouway.asynctaskscheduler.util.FakeCommonParamBinder;
 import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
+import com.clouway.asynctaskscheduler.util.SampleTestDateFormat;
 import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
@@ -31,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import static com.clouway.asynctaskscheduler.spi.AsyncTaskOptions.task;
+import static com.clouway.asynctaskscheduler.util.DateUtil.newDateAndTime;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 
@@ -155,8 +157,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
   }
 
   @Test
-  public void shouldNotAddParamsTotheTaskWhenParamNameOrParamValueAreNull() throws Exception {
-    DefaultActionEvent event = new DefaultActionEvent("test message");
+  public void shouldNotAddParamsToTheTaskWhenParamNameOrParamValueAreNull() throws Exception {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)
             .param(null, "value")
             .param("key", null)
@@ -165,6 +166,30 @@ public class TaskQueueAsyncTaskSchedulerTest {
     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
     assertNotContainsParams(qsi.getTaskInfo().get(0).getBody(), null);
     assertNotContainsParams(qsi.getTaskInfo().get(0).getBody(), "key");
+  }
+
+  @Test
+  public void shouldAddParamDateToTheTaskWhenParamDateIsAdded() throws Exception {
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)
+            .paramDate("date", newDateAndTime(2010,12,1,0,0,0,0))
+            .paramDate("dateAndTime", newDateAndTime(2010,12,1,11,30,0,0))
+    ).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "date", "01-12-2010 00:00");
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "dateAndTime", "01-12-2010 11:30");
+  }
+
+  @Test
+  public void shouldAddParamToTheTaskWhenParamIsAddedAndParamFormatIsProvided() throws Exception {
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)
+            .param("date", newDateAndTime(2010, 12, 1, 0, 0, 0, 0), SampleTestDateFormat.class)
+            .param("dateAndTime", newDateAndTime(2010, 12, 1, 11, 30, 0, 0), SampleTestDateFormat.class)
+    ).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "date", "01/12/2010");
+    assertParams(qsi.getTaskInfo().get(0).getBody(), "dateAndTime", "01/12/2010");
   }
 
   @Test

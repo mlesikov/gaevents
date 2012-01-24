@@ -130,7 +130,7 @@ public class AsyncTaskParams {
   }
 
   /**
-   * Formats the parameter( with the given key) using the given format class
+   * Formats the parameter( with the given key) using the given parse class
    *
    * @param key
    * @param formatClass
@@ -138,24 +138,22 @@ public class AsyncTaskParams {
    * @return
    */
   public <T> T format(String key, Class<? extends ParamFormat<T>> formatClass) {
-    if (isEmpty(findParam(key))) {
+    if (isEmpty(findParam(key)) && formatClass != null) {
       return null;
     }
 
     try {
       ParamFormat<T> paramFormat = formatClass.newInstance();
 
-      T t = paramFormat.format(findParam(key));
+      T t = paramFormat.parse(findParam(key));
 
       return t;
 
     } catch (InstantiationException e) {
-      e.printStackTrace();
+      throw new IllegalArgumentException(e);
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
+      throw new IllegalArgumentException(e);
     }
-
-    return null;
   }
 
 

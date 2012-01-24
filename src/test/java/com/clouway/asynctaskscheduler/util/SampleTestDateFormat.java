@@ -1,4 +1,6 @@
-package com.clouway.asynctaskscheduler.spi;
+package com.clouway.asynctaskscheduler.util;
+
+import com.clouway.asynctaskscheduler.spi.ParamFormat;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -7,10 +9,10 @@ import java.util.Date;
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class SampleDateFormat implements ParamFormat<Date> {
+public class SampleTestDateFormat implements ParamFormat<Date> {
 
     @Override
-    public Date format(String value) {
+    public Date parse(String value) {
 
       try {
         return new SimpleDateFormat("dd/MM/yyyy").parse(value);
@@ -19,4 +21,9 @@ public class SampleDateFormat implements ParamFormat<Date> {
       }
       return null;
     }
+
+  @Override
+  public String format(Date date) {
+    return new SimpleDateFormat("dd/MM/yyyy").format(date);
+  }
 }
