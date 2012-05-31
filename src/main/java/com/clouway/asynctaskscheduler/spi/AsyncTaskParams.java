@@ -18,18 +18,59 @@ public class AsyncTaskParams {
   public static final String DEFAULT_DATE_PATTERN = "dd-MM-yyyy";
   public static final String DEFAULT_DATE_AND_TIME_PATTERN = "dd-MM-yyyy HH:mm";
 
-  public static AsyncTaskParams with(String p1, String v1, String p2, String v2) {
-    Map<String, String[]> map = Maps.newHashMap();
-    map.put(p1, array(v1));
-    map.put(p2, array(v2));
-    return new AsyncTaskParams(map);
+  /**
+   * A builder method
+   * @return
+   */
+  public static Builder aNewParams() {
+    return new Builder();
   }
 
-  public static AsyncTaskParams with(String p1, String v1) {
-    Map<String, String[]> map = Maps.newHashMap();
-    map.put(p1, array(v1));
-    return new AsyncTaskParams(map);
+  public static class Builder {
+
+    private Map<String, String[]> params = Maps.newHashMap();
+
+    public Builder addDouble(String key, Double value) {
+      if (value != null) {
+        putParam(key, value.toString());
+      }
+      return this;
+    }
+
+    public Builder addLong(String key, Double value) {
+      if (value != null) {
+        putParam(key, value.toString());
+      }
+      return this;
+    }
+
+
+    public Builder addString(String key, String value) {
+      if (value != null) {
+        putParam(key, value);
+      }
+      return this;
+    }
+
+    public Builder addDate(String key, Date date) {
+      putParam(key, new SimpleDateFormat(DEFAULT_DATE_PATTERN).format(date));
+      return this;
+    }
+
+    public Builder addDateAndTime(String key, Date date) {
+      putParam(key, new SimpleDateFormat(DEFAULT_DATE_AND_TIME_PATTERN).format(date));
+      return this;
+    }
+
+    public AsyncTaskParams build() {
+      return new AsyncTaskParams(params);
+    }
+
+    private void putParam(String key, String value) {
+      params.put(key, array(value));
+    }
   }
+
 
   private Map<String, String[]> params;
 
