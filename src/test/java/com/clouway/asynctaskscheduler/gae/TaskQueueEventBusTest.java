@@ -1,10 +1,10 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.common.ActionEvent;
+import com.clouway.asynctaskscheduler.common.DefaultActionEvent;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
+import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
-import com.clouway.asynctaskscheduler.util.FakeCommonParamBinder;
 import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
 import com.clouway.asynctaskscheduler.util.SimpleScope;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -22,9 +22,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -39,13 +41,18 @@ public class TaskQueueEventBusTest {
 
   private Injector injector;
 
-  private final LocalServiceTestHelper helper =
-          new LocalServiceTestHelper(new LocalTaskQueueTestConfig());
+
+  private LocalServiceTestHelper helper;
 
   private SimpleScope fakeRequestScope = new SimpleScope();
 
   @Before
   public void setUp() throws Exception {
+
+    LocalTaskQueueTestConfig localTaskQueueTestConfig = new LocalTaskQueueTestConfig();
+    localTaskQueueTestConfig.setQueueXmlPath("src/test/java/queue.xml");
+    helper = new LocalServiceTestHelper(localTaskQueueTestConfig);
+
     helper.setUp();
     injector = Guice.createInjector(Modules.override(new BackgroundTasksModule()).with(new FakeRequestScopeModule(fakeRequestScope)));
     injector.injectMembers(this);
@@ -66,6 +73,32 @@ public class TaskQueueEventBusTest {
     QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
     assertEquals(1, defaultQueueStateInfo.getTaskInfo().size());
     assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
+  }
+
+  @Test
+  public void shouldAddTaskQueueToDefaultTaskQueueForExecutingHandlingTheFiredEventAfterDelay() throws Exception {
+    ActionEvent event = new ActionEvent("test");
+    Date start = new Date();
+    eventBus.fireEvent(event, 1000l);
+
+    QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, defaultQueueStateInfo.getTaskInfo().size());
+    assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
+    System.out.println(defaultQueueStateInfo.getTaskInfo().get(0).getEtaMillis() - start.getTime());
+    assertTrue(defaultQueueStateInfo.getTaskInfo().get(0).getEtaMillis() - start.getTime() > 1000);
+  }
+
+  @Test
+  public void shouldAddTaskInToDifferentTaskQueue() throws Exception {
+
+    DefaultActionEvent event = new DefaultActionEvent("test");
+    eventBus.fireEvent(event);
+
+    QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(0, defaultQueueStateInfo.getTaskInfo().size());
+
+    QueueStateInfo customQueueStateInfo = getQueueStateInfo("customTaskQueue");
+    assertEquals(1, customQueueStateInfo.getTaskInfo().size());
   }
 
   @Test

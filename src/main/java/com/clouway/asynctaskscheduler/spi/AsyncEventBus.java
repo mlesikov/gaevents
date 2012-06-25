@@ -7,7 +7,7 @@ public interface AsyncEventBus {
 
   /**
    * Fires the given async event to the handlers listening to the event's type.
-   * <p>
+   * <p/>
    * Any exceptions thrown by handlers will be bundled into a
    * completed. An exception thrown by a handler will not prevent other handlers
    * from executing.
@@ -15,4 +15,15 @@ public interface AsyncEventBus {
    * @param event the event
    */
   void fireEvent(AsyncEvent<?> event);
+
+  /**
+   * Fires the given async event to the handlers listening to the event's type after specified delay in mills
+   * <p/>
+   * Any exceptions thrown by handlers will be bundled into a
+   * completed. An exception thrown by a handler will not prevent other handlers
+   * from executing.
+   *
+   * @param event the event
+   */
+  public void fireEvent(AsyncEvent<?> event, long delayMills);
 }

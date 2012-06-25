@@ -27,4 +27,10 @@ class TaskQueueEventBus implements AsyncEventBus {
     log.info("fired async event : " + event.getClass().getSimpleName());
     taskScheduler.get().add(AsyncTaskOptions.event(event)).now();
   }
+
+  @Override
+  public void fireEvent(AsyncEvent<?> event, long delayMills) {
+    log.info("fired async event : " + event.getClass().getSimpleName());
+    taskScheduler.get().add(AsyncTaskOptions.event(event).delay(delayMills)).now();
+  }
 }
