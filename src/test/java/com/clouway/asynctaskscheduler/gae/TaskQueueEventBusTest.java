@@ -22,10 +22,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -117,11 +122,28 @@ public class TaskQueueEventBusTest {
     assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
   }
 
+
+  @Test
+  public void shouldAddTaskQueueExecutingHandlingTheFiredEventThatContainsSpecialSymbols() throws Exception {
+    ActionEvent event = new ActionEvent("test % test? *");
+    eventBus.fireEvent(event);
+
+    QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    String taskQueueBody = defaultQueueStateInfo.getTaskInfo().get(0).getBody();
+    assertEvent(taskQueueBody, event);
+    String decodedEventValue = URLDecoder.decode(TaskQueueParamParser.parse(taskQueueBody).get(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON),"UTF-8");
+    assertThat(decodedEventValue, is(equalTo(gson.toJson(event))));
+  }
+
   private void assertEvent(String taskQueueBody, AsyncEvent event) throws UnsupportedEncodingException {
     Map<String, String> params = TaskQueueParamParser.parse(taskQueueBody);
     assertEquals(params.get(TaskQueueAsyncTaskScheduler.EVENT), event.getClass().getName());
-    assertEquals(params.get(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON), gson.toJson(event));
+    assertEquals(params.get(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON), encode(gson.toJson(event)));
   }
+
+  private String encode(String value) throws UnsupportedEncodingException {
+     return URLEncoder.encode(value,"UTF-8");
+   }
 
   private QueueStateInfo getQueueStateInfo(String queueName) {
     LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();

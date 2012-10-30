@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,7 +128,16 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     //main task queue parameter
     task.param(EVENT, taskOptions.getEvent().getClass().getName());
-    task.param(EVENT_AS_JSON, gson.toJson(taskOptions.getEvent()).toString());
+    String eventAsJson = gson.toJson(taskOptions.getEvent()).toString();
+    try {
+
+      String encodedEventAsJson = URLEncoder.encode(eventAsJson,"UTF-8");
+      task.param(EVENT_AS_JSON, encodedEventAsJson);
+
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
 
     //adds all other parameters
     task = addParams(task, taskOptions.getParams());

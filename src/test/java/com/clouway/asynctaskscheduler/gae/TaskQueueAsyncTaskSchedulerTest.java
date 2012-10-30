@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 
 import static com.clouway.asynctaskscheduler.spi.AsyncTaskOptions.task;
@@ -142,7 +143,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
     assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT, event.getClass().getName());
-    assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT_AS_JSON, gson.toJson(event));
+    assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT_AS_JSON, encode(gson.toJson(event)));
+  }
+
+  private String encode(String value) throws UnsupportedEncodingException {
+    return URLEncoder.encode(value,"UTF-8");
   }
 
   @Test
@@ -153,7 +158,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     QueueStateInfo qsi = getQueueStateInfo(DefaultActionEvent.CUSTOM_TASK_QUEUE_NAME);
     assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT, event.getClass().getName());
-    assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT_AS_JSON, gson.toJson(event));
+    assertParams(qsi.getTaskInfo().get(0).getBody(), TaskQueueAsyncTaskScheduler.EVENT_AS_JSON, encode(gson.toJson(event)));
   }
 
   @Test
