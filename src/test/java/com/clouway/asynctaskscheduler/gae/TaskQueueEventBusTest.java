@@ -91,7 +91,7 @@ public class TaskQueueEventBusTest {
     assertEquals(1, defaultQueueStateInfo.getTaskInfo().size());
     assertEvent(defaultQueueStateInfo.getTaskInfo().get(0).getBody(), event);
     System.out.println(defaultQueueStateInfo.getTaskInfo().get(0).getEtaMillis() - start.getTime());
-    assertTrue(defaultQueueStateInfo.getTaskInfo().get(0).getEtaMillis() - start.getTime() > 1000);
+    assertTrue(defaultQueueStateInfo.getTaskInfo().get(0).getEtaMillis() - start.getTime() >= 1000);
   }
 
   @Test
