@@ -105,7 +105,7 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
    */
   private void addEventTaskQueueOption(AsyncTaskOptions taskOptions) {
 
-    Queue queue = getQueue(taskOptions.getEvent().getClass());
+    Queue queue = getQueue(taskOptions.getEvent().getClass(),taskOptions.getEvent().getAssociatedHandlerClass());
 
     TaskOptions task = createEventTaskOptions(taskOptions);
 
@@ -252,13 +252,19 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
   /**
    * Gets the Task Queue from the given name or the Default Task Queue
    *
-   * @param asyncJobClass
+   * @param asyncJobClasses
    * @return
    */
-  private Queue getQueue(Class asyncJobClass) {
+  private Queue getQueue(Class... asyncJobClasses) {
     Queue queue;
+    QueueName queueName = null;
 
-    QueueName queueName = (QueueName) asyncJobClass.getAnnotation(QueueName.class);
+    for (Class asyncJobClass : asyncJobClasses) {
+      QueueName classQueueName = (QueueName) asyncJobClass.getAnnotation(QueueName.class);
+      if (classQueueName != null && !Strings.isNullOrEmpty(classQueueName.name())) {
+        queueName = classQueueName;
+      }
+    }
 
     if (queueName != null && !Strings.isNullOrEmpty(queueName.name())) {
 

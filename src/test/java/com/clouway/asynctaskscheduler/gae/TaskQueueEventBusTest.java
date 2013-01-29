@@ -1,6 +1,7 @@
 package com.clouway.asynctaskscheduler.gae;
 
 import com.clouway.asynctaskscheduler.common.ActionEvent;
+import com.clouway.asynctaskscheduler.common.CustomTaskQueueAsyncEvent;
 import com.clouway.asynctaskscheduler.common.DefaultActionEvent;
 import com.clouway.asynctaskscheduler.common.TaskQueueParamParser;
 import com.clouway.asynctaskscheduler.spi.AsyncEvent;
@@ -103,6 +104,19 @@ public class TaskQueueEventBusTest {
     assertEquals(0, defaultQueueStateInfo.getTaskInfo().size());
 
     QueueStateInfo customQueueStateInfo = getQueueStateInfo("customTaskQueue");
+    assertEquals(1, customQueueStateInfo.getTaskInfo().size());
+  }
+
+  @Test
+  public void shouldAddTaskInToDifferentTaskQueueWhenHandlerIsSetToDifferent() throws Exception {
+
+    CustomTaskQueueAsyncEvent event = new CustomTaskQueueAsyncEvent("test");
+    eventBus.fireEvent(event);
+
+    QueueStateInfo defaultQueueStateInfo = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(0, defaultQueueStateInfo.getTaskInfo().size());
+
+    QueueStateInfo customQueueStateInfo = getQueueStateInfo("customActionEventTaskQueue");
     assertEquals(1, customQueueStateInfo.getTaskInfo().size());
   }
 
