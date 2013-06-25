@@ -11,6 +11,9 @@ import com.clouway.asynctaskscheduler.util.FakeCommonParamBinder;
 import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
 import com.clouway.asynctaskscheduler.util.SampleTestDateFormat;
 import com.clouway.asynctaskscheduler.util.SimpleScope;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -121,6 +124,98 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
   }
 
+
+  @Test
+  public void transactionalTaskQueuesAreAddedAfterTransactionCommit() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(0, qsi.getTaskInfo().size());
+
+    transaction.commit();
+
+    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getCountTasks());
+
+  }
+
+  @Test
+  public void onlyTransactionLessTaskQueuesAreAddedAfterTransactionCommit() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).transactionless());
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getTaskInfo().size());
+
+    transaction.commit();
+
+    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(2, qsi.getCountTasks());
+
+  }
+
+  @Test
+  public void taskQueuesAreNotAddedAfterRollBack() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(0, qsi.getTaskInfo().size());
+
+    transaction.rollback();
+
+    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(0, qsi.getCountTasks());
+
+  }
+
+  @Test
+  public void transactionLessTaskQueuesAreAddedEventTransactionRollBack() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).transactionless());
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getTaskInfo().size());
+
+    transaction.rollback();
+
+    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getCountTasks());
+
+  }
+
+  @Test
+  public void namedTransactionLessTaskQueuesInATransaction() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).transactionless().named("name")).now();
+
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getTaskInfo().size());
+
+    transaction.commit();
+
+    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(1, qsi.getCountTasks());
+  }
+
   @Test
   public void shouldAddTaskToTheDefaultTaskQueueWithTheGivenParams() throws Exception {
     String paramName = "paramName";
@@ -147,7 +242,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
   }
 
   private String encode(String value) throws UnsupportedEncodingException {
-    return URLEncoder.encode(value,"UTF-8");
+    return URLEncoder.encode(value, "UTF-8");
   }
 
   @Test
@@ -176,8 +271,8 @@ public class TaskQueueAsyncTaskSchedulerTest {
   @Test
   public void shouldAddParamDateToTheTaskWhenParamDateIsAdded() throws Exception {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)
-            .paramDate("date", newDateAndTime(2010,12,1,0,0,0,0))
-            .paramDate("dateAndTime", newDateAndTime(2010,12,1,11,30,0,0))
+            .paramDate("date", newDateAndTime(2010, 12, 1, 0, 0, 0, 0))
+            .paramDate("dateAndTime", newDateAndTime(2010, 12, 1, 11, 30, 0, 0))
     ).now();
 
     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());

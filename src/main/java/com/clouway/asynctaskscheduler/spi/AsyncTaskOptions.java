@@ -18,6 +18,7 @@ public class AsyncTaskOptions {
   private long executionDateMills = 0;
   private AsyncEvent event;
   private String taskName;
+  private Boolean transactionless = false;
 
 
   private AsyncTaskOptions() {
@@ -89,6 +90,11 @@ public class AsyncTaskOptions {
     return this;
   }
 
+  public AsyncTaskOptions transactionless() {
+    transactionless = true;
+    return this;
+  }
+
   public Class<? extends AsyncTask> getAsyncTask() {
     return asyncTask;
   }
@@ -115,6 +121,10 @@ public class AsyncTaskOptions {
 
   public String getTaskName() {
     return taskName;
+  }
+
+  public Boolean isTransactionless() {
+    return transactionless;
   }
 
   public boolean isEventTaskOption() {

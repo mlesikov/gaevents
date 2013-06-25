@@ -158,8 +158,16 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     setExecutionDate(taskOptions, task);
 
+
+
+
     try {
-      queue.add(task);
+
+      if (taskOptions.isTransactionless()) {
+        queue.add(null, task);
+      } else {
+        queue.add(task);
+      }
     } catch (TaskAlreadyExistsException e) {
       // Fan-In magic goes here
     }
