@@ -144,7 +144,7 @@
 			version pointed to by ${gae.home} property (Typically, one used by
 			your Eclipse plug-in)
 		-->
-		<gae.version>1.8.0</gae.version>
+		<gae.version>1.8.6</gae.version>
 	</properties>
 
 
