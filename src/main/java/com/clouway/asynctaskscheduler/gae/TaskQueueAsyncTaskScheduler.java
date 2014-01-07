@@ -112,7 +112,7 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     setExecutionDate(taskOptions, task);
 
-    queue.add(task);
+    addTaskToTheQueue(taskOptions, queue, task);
 
   }
 
@@ -159,8 +159,11 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
     setExecutionDate(taskOptions, task);
 
 
+    addTaskToTheQueue(taskOptions, queue, task);
 
+  }
 
+  private void addTaskToTheQueue(AsyncTaskOptions taskOptions, Queue queue, TaskOptions task) {
     try {
 
       if (taskOptions.isTransactionless()) {
@@ -171,7 +174,6 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
     } catch (TaskAlreadyExistsException e) {
       // Fan-In magic goes here
     }
-
   }
 
   /**

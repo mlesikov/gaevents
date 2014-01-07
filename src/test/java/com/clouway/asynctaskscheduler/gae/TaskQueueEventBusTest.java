@@ -8,6 +8,9 @@ import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
 import com.clouway.asynctaskscheduler.util.FakeRequestScopeModule;
 import com.clouway.asynctaskscheduler.util.SimpleScope;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -147,6 +150,92 @@ public class TaskQueueEventBusTest {
     assertEvent(taskQueueBody, event);
     String decodedEventValue = URLDecoder.decode(TaskQueueParamParser.parse(taskQueueBody).get(TaskQueueAsyncTaskScheduler.EVENT_AS_JSON),"UTF-8");
     assertThat(decodedEventValue, is(equalTo(gson.toJson(event))));
+  }
+
+
+  @Test
+  public void transactionalAsyncEventsAreAddedAfterTransactionCommit() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    eventBus.fireEvent(new ActionEvent("test"));
+
+    assertAddedTasks(0);
+
+    transaction.commit();
+
+    assertAddedTasks(1);
+
+  }
+
+  @Test
+  public void onlyTransactionLessAsyncEventAreAddedAfterTransactionCommit() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    eventBus.fireTrasnactionlessEvent(new ActionEvent("test transacionless"));
+    eventBus.fireEvent(new ActionEvent("test"));
+
+    assertAddedTasks(1);
+
+    transaction.commit();
+
+    assertAddedTasks(2);
+  }
+
+  @Test
+  public void onlyTransactionLessAsyncEventWithDelayExecutionAreAddedAfterTransactionCommit() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    eventBus.fireTrasnactionlessEvent(new ActionEvent("test transacionless"), 1000);
+    eventBus.fireEvent(new ActionEvent("test"));
+
+    assertAddedTasks(1);
+
+    transaction.commit();
+
+    assertAddedTasks(2);
+  }
+
+  private void assertAddedTasks(int expectedTaskCount) {
+    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+    assertEquals(expectedTaskCount, qsi.getTaskInfo().size());
+  }
+
+  @Test
+  public void asyncEventsAreNotAddedAfterRollBack() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    eventBus.fireEvent(new ActionEvent("test"));
+
+    assertAddedTasks(0);
+
+    transaction.rollback();
+
+    assertAddedTasks(0);
+  }
+
+  @Test
+  public void transactionLessAsyncEventsAreAddedEventTransactionRollBack() {
+
+    DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    Transaction transaction = datastoreService.beginTransaction();
+
+    eventBus.fireTrasnactionlessEvent(new ActionEvent("test transacionless"));
+    eventBus.fireEvent(new ActionEvent("test"));
+
+    assertAddedTasks(1);
+
+    transaction.rollback();
+
+    assertAddedTasks(1);
+
   }
 
   private void assertEvent(String taskQueueBody, AsyncEvent event) throws UnsupportedEncodingException {

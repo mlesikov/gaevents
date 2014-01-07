@@ -119,8 +119,7 @@ public class TaskQueueAsyncTaskSchedulerTest {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).named("work-index-1")).now();
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).named("work-index-1")).now();
 
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getTaskInfo().size());
+    assertAddedTasks(1);
 
   }
 
@@ -133,13 +132,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
 
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(0, qsi.getTaskInfo().size());
+    assertAddedTasks(0);
 
     transaction.commit();
 
-    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getCountTasks());
+    assertAddedTasks(1);
 
   }
 
@@ -152,13 +149,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).transactionless());
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
 
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getTaskInfo().size());
+    assertAddedTasks(1);
 
     transaction.commit();
 
-    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(2, qsi.getCountTasks());
+    assertAddedTasks(2);
 
   }
 
@@ -170,13 +165,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
 
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(0, qsi.getTaskInfo().size());
+    assertAddedTasks(0);
 
     transaction.rollback();
 
-    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(0, qsi.getCountTasks());
+    assertAddedTasks(0);
 
   }
 
@@ -189,13 +182,11 @@ public class TaskQueueAsyncTaskSchedulerTest {
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).transactionless());
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class)).now();
 
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getTaskInfo().size());
+    assertAddedTasks(1);
 
     transaction.rollback();
 
-    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getCountTasks());
+    assertAddedTasks(1);
 
   }
 
@@ -207,14 +198,17 @@ public class TaskQueueAsyncTaskSchedulerTest {
 
     taskScheduler.add(AsyncTaskOptions.task(DefaultTaskQueueAsyncTask.class).transactionless().named("name")).now();
 
-    QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getTaskInfo().size());
+    assertAddedTasks(1);
 
     transaction.commit();
 
-    qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
-    assertEquals(1, qsi.getCountTasks());
+    assertAddedTasks(1);
   }
+
+  private void assertAddedTasks(int expectedTaskCount) {
+     QueueStateInfo qsi = getQueueStateInfo(QueueFactory.getDefaultQueue().getQueueName());
+     assertEquals(expectedTaskCount, qsi.getTaskInfo().size());
+   }
 
   @Test
   public void shouldAddTaskToTheDefaultTaskQueueWithTheGivenParams() throws Exception {
