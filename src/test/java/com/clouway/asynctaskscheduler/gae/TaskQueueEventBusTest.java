@@ -175,7 +175,7 @@ public class TaskQueueEventBusTest {
     DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
     Transaction transaction = datastoreService.beginTransaction();
 
-    eventBus.fireTrasnactionlessEvent(new ActionEvent("test transacionless"));
+    eventBus.fireTransactionLessEvent(new ActionEvent("test transacionless"));
     eventBus.fireEvent(new ActionEvent("test"));
 
     assertAddedTasks(1);
@@ -191,7 +191,7 @@ public class TaskQueueEventBusTest {
     DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
     Transaction transaction = datastoreService.beginTransaction();
 
-    eventBus.fireTrasnactionlessEvent(new ActionEvent("test transacionless"), 1000);
+    eventBus.fireTransactionLessEvent(new ActionEvent("test transacionless"), 1000);
     eventBus.fireEvent(new ActionEvent("test"));
 
     assertAddedTasks(1);
@@ -227,7 +227,7 @@ public class TaskQueueEventBusTest {
     DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
     Transaction transaction = datastoreService.beginTransaction();
 
-    eventBus.fireTrasnactionlessEvent(new ActionEvent("test transacionless"));
+    eventBus.fireTransactionLessEvent(new ActionEvent("test transacionless"));
     eventBus.fireEvent(new ActionEvent("test"));
 
     assertAddedTasks(1);

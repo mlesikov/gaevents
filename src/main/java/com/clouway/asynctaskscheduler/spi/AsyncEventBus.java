@@ -37,7 +37,7 @@ public interface AsyncEventBus {
    *
    * @param event the event
    */
-  void fireTrasnactionlessEvent(AsyncEvent<?> event);
+  void fireTransactionLessEvent(AsyncEvent<?> event);
 
   /**
     * Fires the given async event transactionless (no matter of the transaction success)
@@ -49,6 +49,6 @@ public interface AsyncEventBus {
     *
     * @param event the event
     */
-  void fireTrasnactionlessEvent(AsyncEvent<?> event, long delayMills);
+  void fireTransactionLessEvent(AsyncEvent<?> event, long delayMills);
 
 }
