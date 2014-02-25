@@ -1,15 +1,8 @@
 package com.clouway.asynctaskscheduler.gae;
 
-import com.clouway.asynctaskscheduler.spi.AsyncEvent;
-import com.clouway.asynctaskscheduler.spi.AsyncEventBus;
-import com.clouway.asynctaskscheduler.spi.AsyncEventHandler;
-import com.clouway.asynctaskscheduler.spi.AsyncEventHandlerFactory;
-import com.clouway.asynctaskscheduler.spi.AsyncEventListener;
-import com.clouway.asynctaskscheduler.spi.AsyncEventListenersFactory;
-import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
+import com.clouway.asynctaskscheduler.spi.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -69,6 +62,11 @@ public class BackgroundTasksModule extends AbstractModule {
   @Override
   protected void configure() {
     install(servletsModule);
+    bind(EventTransport.class).to(getEventTransport()).in(Singleton.class);
+  }
+
+  protected Class<? extends EventTransport> getEventTransport() {
+    return GsonEventTransport.class;
   }
 
   @Provides
@@ -77,8 +75,8 @@ public class BackgroundTasksModule extends AbstractModule {
   }
 
   @Provides
-  public AsyncTaskScheduler getAsyncTaskScheduler(Gson gson, Provider<CommonParamBinder> commonParamBinderProvider) {
-    return new TaskQueueAsyncTaskScheduler(gson, commonParamBinderProvider.get());
+  public AsyncTaskScheduler getAsyncTaskScheduler(EventTransport eventTransport, Provider<CommonParamBinder> commonParamBinderProvider) {
+    return new TaskQueueAsyncTaskScheduler(eventTransport, commonParamBinderProvider.get());
   }
 
   @Override

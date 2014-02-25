@@ -5,10 +5,12 @@ import com.clouway.asynctaskscheduler.spi.AsyncEventHandler;
 import com.clouway.asynctaskscheduler.spi.AsyncEventHandlerFactory;
 import com.clouway.asynctaskscheduler.spi.AsyncEventListener;
 import com.clouway.asynctaskscheduler.spi.AsyncEventListenersFactory;
+import com.clouway.asynctaskscheduler.spi.EventTransport;
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,15 +19,16 @@ import java.util.List;
  */
 public class RoutingEventDispatcher {
 
-  private final Gson gson;
+
+  private final EventTransport eventTransport;
   private final AsyncEventHandlerFactory handlerFactory;
   private final AsyncEventListenersFactory listenersFactory;
 
   @Inject
-  public RoutingEventDispatcher(Gson gson,
+  public RoutingEventDispatcher(EventTransport eventTransport,
                                 AsyncEventHandlerFactory handlerFactory,
                                 AsyncEventListenersFactory listenersFactory) {
-    this.gson = gson;
+    this.eventTransport = eventTransport;
     this.handlerFactory = handlerFactory;
     this.listenersFactory = listenersFactory;
   }
@@ -47,7 +50,7 @@ public class RoutingEventDispatcher {
       throw new IllegalArgumentException("No AsyncEvent class provided.");
     }
 
-    AsyncEvent<AsyncEventHandler> event = (AsyncEvent) gson.fromJson(eventAsJson, eventClass);
+    AsyncEvent<AsyncEventHandler> event = getAsyncEvent(eventAsJson, eventClass);
 
     Class<? extends AsyncEventHandler> evenHandlerClass = event.getAssociatedHandlerClass();
 
@@ -55,6 +58,21 @@ public class RoutingEventDispatcher {
     dispatchHandler(event, evenHandlerClass);
     //2.
     dispatchListeners(event);
+  }
+
+  private AsyncEvent<AsyncEventHandler> getAsyncEvent(String eventAsJson, Class<?> eventClass) {
+
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(eventAsJson.getBytes());
+
+    AsyncEvent<AsyncEventHandler> event = (AsyncEvent) eventTransport.in(eventClass, inputStream);
+
+    try {
+      inputStream.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return event;
   }
 
   private void dispatchListeners(AsyncEvent<AsyncEventHandler> event) {
