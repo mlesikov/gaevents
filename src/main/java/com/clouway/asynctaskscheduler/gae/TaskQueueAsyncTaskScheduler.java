@@ -156,7 +156,13 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
     eventTransport.out(event.getClass(), event, outputStream);
 
-    String eventAsJson = outputStream.toString();
+    String eventAsJson = "";
+
+    try {
+      eventAsJson = outputStream.toString("UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
 
     try {
       outputStream.close();

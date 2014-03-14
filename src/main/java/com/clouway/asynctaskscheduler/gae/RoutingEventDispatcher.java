@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,12 +63,21 @@ public class RoutingEventDispatcher {
 
   private AsyncEvent<AsyncEventHandler> getAsyncEvent(String eventAsJson, Class<?> eventClass) {
 
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(eventAsJson.getBytes());
+    ByteArrayInputStream inputStream = null;
+
+    try {
+      inputStream = new ByteArrayInputStream(eventAsJson.getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
 
     AsyncEvent<AsyncEventHandler> event = (AsyncEvent) eventTransport.in(eventClass, inputStream);
 
     try {
-      inputStream.close();
+
+      if (inputStream != null) {
+        inputStream.close();
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
