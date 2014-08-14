@@ -4,11 +4,10 @@ import com.clouway.asynctaskscheduler.spi.AsyncEvent;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskOptions;
 import com.clouway.asynctaskscheduler.spi.AsyncTaskScheduler;
 import com.clouway.asynctaskscheduler.spi.EventTransport;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskAlreadyExistsException;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.repackaged.com.google.common.base.Strings;
+import com.google.appengine.api.taskqueue.TransientFailureException;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -61,12 +60,14 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
 
   private final EventTransport eventTransport;
   private final CommonParamBinder commonParamBinder;
+  private TaskApplier taskApplier;
 
 
   @Inject
-  public TaskQueueAsyncTaskScheduler(EventTransport eventTransport, CommonParamBinder commonParamBinder) {
+  public TaskQueueAsyncTaskScheduler(EventTransport eventTransport, CommonParamBinder commonParamBinder, TaskApplier taskApplier) {
     this.eventTransport = eventTransport;
     this.commonParamBinder = commonParamBinder;
+    this.taskApplier = taskApplier;
     this.taskOptions = Lists.newArrayList();
   }
 
@@ -109,14 +110,14 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
    */
   private void addEventTaskQueueOption(AsyncTaskOptions taskOptions) {
 
-    Queue queue = getQueue(taskOptions.getEvent().getClass(),taskOptions.getEvent().getAssociatedHandlerClass());
-
     TaskOptions task = createEventTaskOptions(taskOptions);
 
 
     setExecutionDate(taskOptions, task);
 
-    addTaskToTheQueue(taskOptions, queue, task);
+    String queueName = getQueueName(taskOptions.getEvent().getClass(),taskOptions.getEvent().getAssociatedHandlerClass());
+
+    addTaskToTheQueue(taskOptions, queueName, task);
 
   }
 
@@ -179,28 +180,28 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
    */
   private void addTaskQueue(AsyncTaskOptions taskOptions) {
 
-    Queue queue = getQueue(taskOptions.getAsyncTask());
-
     TaskOptions task = createTaskOptions(taskOptions);
-
 
     setExecutionDate(taskOptions, task);
 
+    String  queueName = getQueueName(taskOptions.getAsyncTask());
 
-    addTaskToTheQueue(taskOptions, queue, task);
+    addTaskToTheQueue(taskOptions, queueName, task);
 
   }
 
-  private void addTaskToTheQueue(AsyncTaskOptions taskOptions, Queue queue, TaskOptions task) {
+  private void addTaskToTheQueue(AsyncTaskOptions taskOptions, String queue, TaskOptions task) {
     try {
 
-      if (taskOptions.isTransactionless()) {
-        queue.add(null, task);
-      } else {
-        queue.add(task);
-      }
+      taskApplier.apply(task, queue, taskOptions.isTransactionless());
+
     } catch (TaskAlreadyExistsException e) {
       // Fan-In magic goes here
+    } catch (TransientFailureException e){
+      //retry adding the task to the queue
+
+      taskApplier.apply(task, queue, taskOptions.isTransactionless());
+
     }
   }
 
@@ -293,8 +294,7 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
    * @param asyncJobClasses
    * @return
    */
-  private Queue getQueue(Class... asyncJobClasses) {
-    Queue queue;
+  private String  getQueueName(Class... asyncJobClasses) {
     QueueName queueName = null;
 
     for (Class asyncJobClass : asyncJobClasses) {
@@ -304,14 +304,10 @@ public class TaskQueueAsyncTaskScheduler implements AsyncTaskScheduler {
       }
     }
 
-    if (queueName != null && !Strings.isNullOrEmpty(queueName.name())) {
-
-      queue = QueueFactory.getQueue(queueName.name());
-
-    } else {
-      queue = QueueFactory.getDefaultQueue();
+    if(queueName!= null){
+      return queueName.name();
     }
 
-    return queue;
+    return "";
   }
 }

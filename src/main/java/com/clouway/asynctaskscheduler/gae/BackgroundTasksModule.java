@@ -75,8 +75,8 @@ public class BackgroundTasksModule extends AbstractModule {
   }
 
   @Provides
-  public AsyncTaskScheduler getAsyncTaskScheduler(EventTransport eventTransport, Provider<CommonParamBinder> commonParamBinderProvider) {
-    return new TaskQueueAsyncTaskScheduler(eventTransport, commonParamBinderProvider.get());
+  public AsyncTaskScheduler getAsyncTaskScheduler(EventTransport eventTransport, Provider<CommonParamBinder> commonParamBinderProvider, TaskApplier taskApplier) {
+    return new TaskQueueAsyncTaskScheduler(eventTransport, commonParamBinderProvider.get(), taskApplier);
   }
 
   @Override
