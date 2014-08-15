@@ -31,7 +31,7 @@ public class PushQueueTaskApplier implements TaskApplier {
   private Queue getQueue(String queueName) {
     Queue queue;
 
-    if (queueName != null && !Strings.isNullOrEmpty(queueName)) {
+    if (!Strings.isNullOrEmpty(queueName)) {
 
       queue = QueueFactory.getQueue(queueName);
 
